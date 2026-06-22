@@ -1,6 +1,9 @@
 import { useState } from 'react'
-import { SafeAreaView, View, Text, Pressable, StyleSheet, StatusBar } from 'react-native'
-import { C } from './src/theme'
+import { SafeAreaView, View, Text, Pressable, StyleSheet, StatusBar, ActivityIndicator } from 'react-native'
+import { useFonts, PlayfairDisplay_700Bold, PlayfairDisplay_800ExtraBold } from '@expo-google-fonts/playfair-display'
+import { DMSans_400Regular, DMSans_500Medium, DMSans_600SemiBold, DMSans_700Bold } from '@expo-google-fonts/dm-sans'
+import { DMMono_500Medium } from '@expo-google-fonts/dm-mono'
+import { C, FONT } from './src/theme'
 import Home from './src/screens/Home'
 import Habits from './src/screens/Habits'
 import Health from './src/screens/Health'
@@ -18,6 +21,20 @@ const TABS = [
 export default function App() {
   const [tab, setTab] = useState('home')
   const active = TABS.find((t) => t.key === tab)!
+  const [fontsLoaded] = useFonts({
+    PlayfairDisplay_700Bold, PlayfairDisplay_800ExtraBold,
+    DMSans_400Regular, DMSans_500Medium, DMSans_600SemiBold, DMSans_700Bold,
+    DMMono_500Medium,
+  })
+
+  if (!fontsLoaded) {
+    return (
+      <View style={[s.shell, { alignItems: 'center', justifyContent: 'center' }]}>
+        <Text style={{ fontSize: 30 }}>🌿</Text>
+        <ActivityIndicator color={C.primary} style={{ marginTop: 12 }} />
+      </View>
+    )
+  }
 
   return (
     <SafeAreaView style={s.shell}>
@@ -29,7 +46,7 @@ export default function App() {
           return (
             <Pressable key={t.key} style={s.navItem} onPress={() => setTab(t.key)}>
               <Text style={{ fontSize: 18, color: on ? C.primary : C.muted }}>{t.icon}</Text>
-              <Text style={{ fontSize: 10, fontWeight: '600', color: on ? C.primary : C.muted }}>{t.label}</Text>
+              <Text style={{ fontSize: 10, fontFamily: FONT.semibold, color: on ? C.primary : C.muted }}>{t.label}</Text>
             </Pressable>
           )
         })}

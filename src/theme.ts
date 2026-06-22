@@ -27,3 +27,14 @@ export const cardShadow = {
 
 export const ICON_CHOICES = ['🏃', '💧', '🧘', '📖', '😴', '🥗', '🏋️', '🚶', '✍️', '🧠', '🦷', '☀️']
 export const CATEGORIES = ['Fitness', 'Health', 'Mental', 'Learning', 'General']
+
+// Brand fonts (loaded via @expo-google-fonts in App.tsx)
+export const FONT = {
+  display: 'PlayfairDisplay_700Bold',     // headings
+  displayXL: 'PlayfairDisplay_800ExtraBold',
+  sans: 'DMSans_400Regular',              // body
+  medium: 'DMSans_500Medium',
+  semibold: 'DMSans_600SemiBold',
+  bold: 'DMSans_700Bold',
+  mono: 'DMMono_500Medium',               // numbers / stats
+} as const

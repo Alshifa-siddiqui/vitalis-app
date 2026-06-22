@@ -1,6 +1,6 @@
 import { View, Text, Pressable, StyleSheet } from 'react-native'
 import Svg, { Circle } from 'react-native-svg'
-import { C, cardShadow } from './theme'
+import { C, cardShadow, FONT } from './theme'
 import { computeStats, isDoneToday } from './streaks'
 import type { Habit } from './store'
 
@@ -18,7 +18,7 @@ export function Ring({
           strokeDasharray={c} strokeDashoffset={c * (1 - value / 100)} strokeLinecap="round"
         />
       </Svg>
-      <Text style={{ color: textColor, fontSize: size * 0.26, fontWeight: '700' }}>{value}</Text>
+      <Text style={{ color: textColor, fontSize: size * 0.26, fontFamily: FONT.mono }}>{value}</Text>
     </View>
   )
 }
@@ -27,7 +27,7 @@ export function Chip({ label, active, onPress }: { label: string; active: boolea
   return (
     <Pressable onPress={onPress}
       style={[s.chip, active ? { backgroundColor: C.primary } : { backgroundColor: C.white, borderWidth: 1, borderColor: 'rgba(0,0,0,0.06)' }]}>
-      <Text style={{ fontSize: 13, fontWeight: '700', color: active ? C.white : C.muted }}>{label}</Text>
+      <Text style={{ fontSize: 13, fontFamily: FONT.bold, color: active ? C.white : C.muted }}>{label}</Text>
     </Pressable>
   )
 }
@@ -38,7 +38,7 @@ export function PrimaryButton({ label, onPress, variant = 'solid' }: { label: st
   return (
     <Pressable onPress={onPress}
       style={[s.btn, { backgroundColor: bg }, variant === 'ghost' && { borderWidth: 1.5, borderColor: C.primary }]}>
-      <Text style={{ color: fg, fontWeight: '700', fontSize: 15 }}>{label}</Text>
+      <Text style={{ color: fg, fontFamily: FONT.bold, fontSize: 15 }}>{label}</Text>
     </Pressable>
   )
 }
@@ -71,13 +71,13 @@ export function HabitRow({ habit, onToggle, onLongPress }: { habit: Habit; onTog
 }
 
 const s = StyleSheet.create({
-  h1: { fontFamily: 'Georgia', fontSize: 24, fontWeight: '700', color: C.forest },
+  h1: { fontFamily: FONT.display, fontSize: 25, color: C.forest },
   chip: { paddingHorizontal: 16, paddingVertical: 7, borderRadius: 999, marginRight: 8 },
   btn: { borderRadius: 14, paddingVertical: 13, alignItems: 'center', justifyContent: 'center' },
   habit: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: C.white, borderRadius: 18, paddingHorizontal: 14, paddingVertical: 12, ...cardShadow },
   habitIcon: { width: 44, height: 44, borderRadius: 14, backgroundColor: C.lightmint, alignItems: 'center', justifyContent: 'center' },
-  habitName: { fontSize: 15, fontWeight: '700', color: C.ink },
-  habitMeta: { fontSize: 12, color: C.muted, marginTop: 2, textTransform: 'capitalize' },
-  streak: { backgroundColor: 'rgba(244,162,97,0.15)', color: C.warmgold, fontSize: 12, fontWeight: '700', paddingHorizontal: 8, paddingVertical: 3, borderRadius: 999, overflow: 'hidden' },
+  habitName: { fontSize: 15, fontFamily: FONT.bold, color: C.ink },
+  habitMeta: { fontSize: 12, fontFamily: FONT.medium, color: C.muted, marginTop: 2, textTransform: 'capitalize' },
+  streak: { backgroundColor: 'rgba(244,162,97,0.15)', color: C.warmgold, fontSize: 12, fontFamily: FONT.bold, paddingHorizontal: 8, paddingVertical: 3, borderRadius: 999, overflow: 'hidden' },
   check: { width: 28, height: 28, borderRadius: 14, borderWidth: 2, alignItems: 'center', justifyContent: 'center' },
 })

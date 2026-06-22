@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { View, Text, ScrollView, Pressable, Modal, TextInput, StyleSheet } from 'react-native'
-import { C, cardShadow, ICON_CHOICES, CATEGORIES } from '../theme'
+import { C, cardShadow, ICON_CHOICES, CATEGORIES, FONT } from '../theme'
 import { Chip, PrimaryButton, HabitRow, Header } from '../ui'
 import { useStore, type Habit } from '../store'
 import type { Frequency } from '../streaks'
@@ -105,9 +105,9 @@ const s = StyleSheet.create({
   fab: { position: 'absolute', right: 20, bottom: 20, width: 58, height: 58, borderRadius: 29, backgroundColor: C.primary, alignItems: 'center', justifyContent: 'center', ...cardShadow, shadowOpacity: 0.3, shadowRadius: 12 },
   backdrop: { flex: 1, backgroundColor: 'rgba(27,45,36,0.45)', justifyContent: 'flex-end' },
   sheet: { backgroundColor: C.canvas, borderTopLeftRadius: 28, borderTopRightRadius: 28, padding: 22, maxHeight: '88%' },
-  sheetTitle: { fontFamily: 'Georgia', fontSize: 22, fontWeight: '700', color: C.forest, marginBottom: 8 },
-  label: { fontSize: 13, fontWeight: '700', color: C.muted, marginTop: 16, marginBottom: 8 },
-  input: { backgroundColor: C.white, borderRadius: 14, paddingHorizontal: 14, paddingVertical: 12, fontSize: 16, color: C.ink, borderWidth: 1, borderColor: 'rgba(0,0,0,0.06)' },
+  sheetTitle: { fontFamily: FONT.display, fontSize: 23, color: C.forest, marginBottom: 8 },
+  label: { fontSize: 13, fontFamily: FONT.bold, color: C.muted, marginTop: 16, marginBottom: 8 },
+  input: { backgroundColor: C.white, borderRadius: 14, paddingHorizontal: 14, paddingVertical: 12, fontSize: 16, fontFamily: FONT.sans, color: C.ink, borderWidth: 1, borderColor: 'rgba(0,0,0,0.06)' },
   iconWrap: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   iconBtn: { width: 46, height: 46, borderRadius: 14, backgroundColor: C.white, alignItems: 'center', justifyContent: 'center', borderWidth: 1.5, borderColor: 'rgba(0,0,0,0.06)' },
 })

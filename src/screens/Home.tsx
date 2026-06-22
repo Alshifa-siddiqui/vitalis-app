@@ -1,5 +1,5 @@
 import { ScrollView, View, Text, StyleSheet } from 'react-native'
-import { C, cardShadow } from '../theme'
+import { C, cardShadow, FONT } from '../theme'
 import { Ring, HabitRow } from '../ui'
 import { useStore } from '../store'
 import { computeStats, isDoneToday } from '../streaks'
@@ -61,12 +61,12 @@ export default function Home() {
 
 const s = StyleSheet.create({
   rowBetween: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  h1: { fontFamily: 'Georgia', fontSize: 24, fontWeight: '700', color: C.forest },
-  h2: { fontFamily: 'Georgia', fontSize: 18, fontWeight: '700', color: C.forest },
+  h1: { fontFamily: FONT.display, fontSize: 25, color: C.forest },
+  h2: { fontFamily: FONT.display, fontSize: 19, color: C.forest },
   avatar: { width: 44, height: 44, borderRadius: 22, backgroundColor: C.primary, alignItems: 'center', justifyContent: 'center' },
   hero: { flexDirection: 'row', alignItems: 'center', gap: 18, backgroundColor: C.forest, borderRadius: 26, padding: 20, ...cardShadow, shadowOpacity: 0.2, shadowRadius: 16 },
   pill: { backgroundColor: 'rgba(255,255,255,0.15)', borderRadius: 14, paddingHorizontal: 12, paddingVertical: 9 },
-  pillText: { color: C.white, fontSize: 13, fontWeight: '600' },
+  pillText: { color: C.white, fontSize: 13, fontFamily: FONT.semibold },
   tip: { flexDirection: 'row', gap: 12, backgroundColor: C.lightmint, borderColor: 'rgba(82,183,136,0.3)', borderWidth: 1, borderRadius: 18, padding: 16, marginTop: 18, marginBottom: 22 },
-  tipLabel: { fontSize: 11, fontWeight: '800', letterSpacing: 0.5, color: C.mid },
+  tipLabel: { fontSize: 11, fontFamily: FONT.bold, letterSpacing: 0.5, color: C.mid },
 })

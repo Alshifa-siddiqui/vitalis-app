@@ -1,5 +1,5 @@
 import { ScrollView, View, Text, StyleSheet } from 'react-native'
-import { C, cardShadow } from '../theme'
+import { C, cardShadow, FONT } from '../theme'
 import { Ring, Header } from '../ui'
 import { useStore } from '../store'
 
@@ -22,7 +22,7 @@ export default function Health() {
       <View style={s.scoreCard}>
         <Ring value={score} color={C.secondary} track={C.lightmint} textColor={C.forest} />
         <View style={{ flex: 1 }}>
-          <Text style={{ fontFamily: 'Georgia', fontSize: 20, fontWeight: '700', color: C.forest }}>Wellness Score</Text>
+          <Text style={{ fontFamily: FONT.display, fontSize: 20, color: C.forest }}>Wellness Score</Text>
           <Text style={{ color: C.muted, marginTop: 4 }}>
             Based on your 7-day habit completion across {habits.length} habits.
           </Text>

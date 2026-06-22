@@ -1,5 +1,5 @@
 import { ScrollView, View, Text, StyleSheet } from 'react-native'
-import { C, cardShadow } from '../theme'
+import { C, cardShadow, FONT } from '../theme'
 import { Header, PrimaryButton } from '../ui'
 import { useStore } from '../store'
 import { computeStats } from '../streaks'
@@ -48,13 +48,13 @@ export default function Profile() {
 const s = StyleSheet.create({
   card: { backgroundColor: C.white, borderRadius: 24, padding: 24, alignItems: 'center', ...cardShadow },
   avatar: { width: 72, height: 72, borderRadius: 36, backgroundColor: C.primary, alignItems: 'center', justifyContent: 'center' },
-  name: { fontFamily: 'Georgia', fontSize: 22, fontWeight: '700', color: C.forest, marginTop: 12 },
+  name: { fontFamily: FONT.display, fontSize: 23, color: C.forest, marginTop: 12 },
   statsRow: { flexDirection: 'row', alignItems: 'center', marginTop: 18 },
   stat: { alignItems: 'center', paddingHorizontal: 24 },
-  statV: { fontFamily: 'Georgia', fontSize: 24, fontWeight: '700', color: C.primary },
-  statL: { fontSize: 12, color: C.muted, marginTop: 2 },
+  statV: { fontFamily: FONT.mono, fontSize: 24, color: C.primary },
+  statL: { fontSize: 12, fontFamily: FONT.medium, color: C.muted, marginTop: 2 },
   divider: { width: 1, height: 36, backgroundColor: 'rgba(0,0,0,0.08)' },
-  section: { fontFamily: 'Georgia', fontSize: 18, fontWeight: '700', color: C.forest, marginTop: 24, marginBottom: 12 },
+  section: { fontFamily: FONT.display, fontSize: 19, color: C.forest, marginTop: 24, marginBottom: 12 },
   menu: { backgroundColor: C.white, borderRadius: 18, overflow: 'hidden', ...cardShadow },
   menuRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 15, borderBottomWidth: 1, borderBottomColor: 'rgba(0,0,0,0.04)' },
 })

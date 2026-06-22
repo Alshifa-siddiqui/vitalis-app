@@ -1,5 +1,5 @@
 import { ScrollView, View, Text, StyleSheet } from 'react-native'
-import { C, cardShadow } from '../theme'
+import { C, cardShadow, FONT } from '../theme'
 import { Header } from '../ui'
 import { useStore } from '../store'
 import { computeStats, BADGES } from '../streaks'
@@ -61,11 +61,11 @@ export default function Progress() {
 
 const s = StyleSheet.create({
   stat: { flex: 1, backgroundColor: C.white, borderRadius: 18, padding: 16, alignItems: 'center', ...cardShadow },
-  statValue: { fontFamily: 'Georgia', fontSize: 26, fontWeight: '700', color: C.primary },
-  statLabel: { fontSize: 12, color: C.muted, marginTop: 2 },
-  section: { fontFamily: 'Georgia', fontSize: 18, fontWeight: '700', color: C.forest, marginTop: 24, marginBottom: 12 },
+  statValue: { fontFamily: FONT.mono, fontSize: 26, color: C.primary },
+  statLabel: { fontSize: 12, fontFamily: FONT.medium, color: C.muted, marginTop: 2 },
+  section: { fontFamily: FONT.display, fontSize: 19, color: C.forest, marginTop: 24, marginBottom: 12 },
   badgeWrap: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
   badge: { width: 90, backgroundColor: C.white, borderRadius: 16, paddingVertical: 14, alignItems: 'center', gap: 4, ...cardShadow },
-  badgeName: { fontSize: 11, fontWeight: '600', color: C.muted, textAlign: 'center' },
+  badgeName: { fontSize: 11, fontFamily: FONT.semibold, color: C.muted, textAlign: 'center' },
   row: { flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: C.white, borderRadius: 14, paddingHorizontal: 14, paddingVertical: 12, ...cardShadow },
 })
