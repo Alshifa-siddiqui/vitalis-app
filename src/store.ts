@@ -1,0 +1,68 @@
+import { create } from 'zustand'
+import { persist, createJSONStorage } from 'zustand/middleware'
+import AsyncStorage from '@react-native-async-storage/async-storage'
+import { Frequency, todayISO } from './streaks'
+
+export type Habit = {
+  id: string
+  name: string
+  icon: string
+  frequency: Frequency
+  category: string
+  createdAt: string
+  history: string[] // ISO dates of check-ins
+}
+
+function isoDaysAgo(n: number): string {
+  const d = new Date()
+  d.setDate(d.getDate() - n)
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+}
+// `count` consecutive days ending `endOffset` days ago (0 = today)
+const run = (count: number, endOffset = 0) =>
+  Array.from({ length: count }, (_, i) => isoDaysAgo(endOffset + i))
+
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6)
+
+const SEED: Habit[] = [
+  { id: 's1', name: 'Morning Run', icon: '🏃', frequency: 'daily', category: 'Fitness', createdAt: isoDaysAgo(30), history: run(12, 0) },
+  { id: 's2', name: 'Drink Water', icon: '💧', frequency: 'daily', category: 'Health', createdAt: isoDaysAgo(30), history: run(5, 0) },
+  { id: 's3', name: 'Meditation', icon: '🧘', frequency: 'daily', category: 'Mental', createdAt: isoDaysAgo(30), history: run(3, 1) },
+  { id: 's4', name: 'Read 20 Pages', icon: '📖', frequency: 'daily', category: 'Learning', createdAt: isoDaysAgo(30), history: run(8, 1) },
+  { id: 's5', name: 'Sleep by 11pm', icon: '😴', frequency: 'daily', category: 'Health', createdAt: isoDaysAgo(30), history: run(4, 1) },
+]
+
+export type NewHabit = { name: string; icon: string; frequency: Frequency; category: string }
+
+type State = {
+  habits: Habit[]
+  addHabit: (h: NewHabit) => void
+  updateHabit: (id: string, patch: Partial<Habit>) => void
+  deleteHabit: (id: string) => void
+  toggleToday: (id: string) => void
+  resetAll: () => void
+}
+
+export const useStore = create<State>()(
+  persist(
+    (set) => ({
+      habits: SEED,
+      addHabit: (h) =>
+        set((s) => ({ habits: [...s.habits, { id: uid(), createdAt: todayISO(), history: [], ...h }] })),
+      updateHabit: (id, patch) =>
+        set((s) => ({ habits: s.habits.map((x) => (x.id === id ? { ...x, ...patch } : x)) })),
+      deleteHabit: (id) => set((s) => ({ habits: s.habits.filter((x) => x.id !== id) })),
+      toggleToday: (id) =>
+        set((s) => ({
+          habits: s.habits.map((x) => {
+            if (x.id !== id) return x
+            const t = todayISO()
+            const has = x.history.includes(t)
+            return { ...x, history: has ? x.history.filter((d) => d !== t) : [...x.history, t].sort() }
+          }),
+        })),
+      resetAll: () => set({ habits: SEED }),
+    }),
+    { name: 'vitalis-habits-v1', storage: createJSONStorage(() => AsyncStorage) },
+  ),
+)
