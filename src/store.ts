@@ -37,10 +37,12 @@ export type NewHabit = { name: string; icon: string; frequency: Frequency; categ
 
 type State = {
   habits: Habit[]
+  dark: boolean
   addHabit: (h: NewHabit) => void
   updateHabit: (id: string, patch: Partial<Habit>) => void
   deleteHabit: (id: string) => void
   toggleToday: (id: string) => void
+  toggleDark: () => void
   resetAll: () => void
 }
 
@@ -48,6 +50,8 @@ export const useStore = create<State>()(
   persist(
     (set) => ({
       habits: SEED,
+      dark: false,
+      toggleDark: () => set((s) => ({ dark: !s.dark })),
       addHabit: (h) =>
         set((s) => ({ habits: [...s.habits, { id: uid(), createdAt: todayISO(), history: [], ...h }] })),
       updateHabit: (id, patch) =>

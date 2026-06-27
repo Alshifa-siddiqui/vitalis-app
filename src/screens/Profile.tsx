@@ -1,13 +1,18 @@
 import { ScrollView, View, Text, Pressable, StyleSheet } from 'react-native'
-import { C, cardShadow, FONT } from '../theme'
+import { cardShadow, FONT, type Palette } from '../theme'
+import { useColors } from '../useColors'
 import { Header, PrimaryButton } from '../ui'
 import { useStore } from '../store'
 import { useAuth } from '../auth'
 import { computeStats } from '../streaks'
 
 export default function Profile() {
+  const C = useColors()
+  const s = makeStyles(C)
   const habits = useStore((s) => s.habits)
   const resetAll = useStore((s) => s.resetAll)
+  const dark = useStore((s) => s.dark)
+  const toggleDark = useStore((s) => s.toggleDark)
   const { user, signOut, configured } = useAuth()
 
   const totalCheckins = habits.reduce((a, h) => a + computeStats(h.history, h.frequency).completedCount, 0)
@@ -31,6 +36,14 @@ export default function Profile() {
           <View style={s.stat}><Text style={s.statV}>{since ?? '—'}</Text><Text style={s.statL}>Since</Text></View>
         </View>
       </View>
+
+      <Text style={s.section}>Appearance</Text>
+      <Pressable style={[s.menu, s.menuRow]} onPress={toggleDark}>
+        <Text style={{ color: C.ink, fontSize: 15, fontFamily: FONT.medium }}>🌙  Dark mode</Text>
+        <View style={[s.toggle, dark && { backgroundColor: C.primary, alignItems: 'flex-end' }]}>
+          <View style={s.knob} />
+        </View>
+      </Pressable>
 
       <Text style={s.section}>Account</Text>
       <View style={s.menu}>
@@ -59,16 +72,18 @@ export default function Profile() {
   )
 }
 
-const s = StyleSheet.create({
-  card: { backgroundColor: C.white, borderRadius: 24, padding: 24, alignItems: 'center', ...cardShadow },
+const makeStyles = (C: Palette) => StyleSheet.create({
+  card: { backgroundColor: C.card, borderRadius: 24, padding: 24, alignItems: 'center', ...cardShadow },
   avatar: { width: 72, height: 72, borderRadius: 36, backgroundColor: C.primary, alignItems: 'center', justifyContent: 'center' },
   name: { fontFamily: FONT.display, fontSize: 23, color: C.forest, marginTop: 12, textTransform: 'capitalize' },
   statsRow: { flexDirection: 'row', alignItems: 'center', marginTop: 18 },
   stat: { alignItems: 'center', paddingHorizontal: 18 },
   statV: { fontFamily: FONT.mono, fontSize: 18, color: C.primary },
   statL: { fontSize: 12, fontFamily: FONT.medium, color: C.muted, marginTop: 2 },
-  divider: { width: 1, height: 36, backgroundColor: 'rgba(0,0,0,0.08)' },
+  divider: { width: 1, height: 36, backgroundColor: C.muted + '33' },
   section: { fontFamily: FONT.display, fontSize: 19, color: C.forest, marginTop: 24, marginBottom: 12 },
-  menu: { backgroundColor: C.white, borderRadius: 18, overflow: 'hidden', ...cardShadow },
-  menuRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 15, borderBottomWidth: 1, borderBottomColor: 'rgba(0,0,0,0.04)' },
+  menu: { backgroundColor: C.card, borderRadius: 18, overflow: 'hidden', ...cardShadow },
+  menuRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 15, borderBottomWidth: 1, borderBottomColor: C.muted + '22' },
+  toggle: { width: 46, height: 26, borderRadius: 13, backgroundColor: C.muted + '55', padding: 3, justifyContent: 'center' },
+  knob: { width: 20, height: 20, borderRadius: 10, backgroundColor: '#FFFFFF' },
 })

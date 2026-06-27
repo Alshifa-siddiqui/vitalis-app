@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { ScrollView, View, Text, StyleSheet, ActivityIndicator } from 'react-native'
-import { C, cardShadow, FONT } from '../theme'
+import { cardShadow, FONT, type Palette } from '../theme'
+import { useColors } from '../useColors'
 import { Ring, Header, PrimaryButton } from '../ui'
 import { useStore } from '../store'
 import { getAIInsight } from '../ai'
@@ -12,6 +13,8 @@ function isoDaysAgo(n: number): string {
 }
 
 export default function Health() {
+  const C = useColors()
+  const s = makeStyles(C)
   const habits = useStore((s) => s.habits)
   const last7 = Array.from({ length: 7 }, (_, i) => isoDaysAgo(i))
   const rates = habits.map((h) => h.history.filter((d) => last7.includes(d)).length / 7)
@@ -68,8 +71,8 @@ export default function Health() {
   )
 }
 
-const s = StyleSheet.create({
-  scoreCard: { flexDirection: 'row', alignItems: 'center', gap: 18, backgroundColor: C.white, borderRadius: 24, padding: 20, ...cardShadow },
+const makeStyles = (C: Palette) => StyleSheet.create({
+  scoreCard: { flexDirection: 'row', alignItems: 'center', gap: 18, backgroundColor: C.card, borderRadius: 24, padding: 20, ...cardShadow },
   aiCard: { flexDirection: 'row', gap: 12, backgroundColor: C.lightmint, borderRadius: 18, padding: 16, marginTop: 16, borderWidth: 1, borderColor: 'rgba(82,183,136,0.3)' },
-  note: { backgroundColor: C.white, borderRadius: 16, padding: 16, marginTop: 16, ...cardShadow },
+  note: { backgroundColor: C.card, borderRadius: 16, padding: 16, marginTop: 16, ...cardShadow },
 })

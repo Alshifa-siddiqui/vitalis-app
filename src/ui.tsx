@@ -1,11 +1,12 @@
 import { View, Text, Pressable, StyleSheet } from 'react-native'
 import Svg, { Circle } from 'react-native-svg'
-import { C, cardShadow, FONT } from './theme'
+import { cardShadow, FONT, type Palette } from './theme'
+import { useColors } from './useColors'
 import { computeStats, isDoneToday } from './streaks'
 import type { Habit } from './store'
 
 export function Ring({
-  value, size = 116, stroke = 11, color = C.gold, track = 'rgba(255,255,255,0.2)', textColor = C.white,
+  value, size = 116, stroke = 11, color = '#FFD166', track = 'rgba(255,255,255,0.2)', textColor = '#FFFFFF',
 }: { value: number; size?: number; stroke?: number; color?: string; track?: string; textColor?: string }) {
   const r = (size - stroke) / 2
   const c = 2 * Math.PI * r
@@ -24,15 +25,19 @@ export function Ring({
 }
 
 export function Chip({ label, active, onPress }: { label: string; active: boolean; onPress: () => void }) {
+  const C = useColors()
+  const s = makeStyles(C)
   return (
     <Pressable onPress={onPress}
-      style={[s.chip, active ? { backgroundColor: C.primary } : { backgroundColor: C.white, borderWidth: 1, borderColor: 'rgba(0,0,0,0.06)' }]}>
+      style={[s.chip, active ? { backgroundColor: C.primary } : { backgroundColor: C.card, borderWidth: 1, borderColor: C.muted + '33' }]}>
       <Text style={{ fontSize: 13, fontFamily: FONT.bold, color: active ? C.white : C.muted }}>{label}</Text>
     </Pressable>
   )
 }
 
 export function PrimaryButton({ label, onPress, variant = 'solid' }: { label: string; onPress: () => void; variant?: 'solid' | 'ghost' | 'danger' }) {
+  const C = useColors()
+  const s = makeStyles(C)
   const bg = variant === 'solid' ? C.primary : variant === 'danger' ? C.error : 'transparent'
   const fg = variant === 'ghost' ? C.primary : C.white
   return (
@@ -44,15 +49,18 @@ export function PrimaryButton({ label, onPress, variant = 'solid' }: { label: st
 }
 
 export function Header({ title, subtitle }: { title: string; subtitle?: string }) {
+  const C = useColors()
   return (
     <View style={{ marginBottom: 16 }}>
       {subtitle ? <Text style={{ color: C.muted, fontSize: 14 }}>{subtitle}</Text> : null}
-      <Text style={s.h1}>{title}</Text>
+      <Text style={{ fontFamily: FONT.display, fontSize: 25, color: C.forest }}>{title}</Text>
     </View>
   )
 }
 
 export function HabitRow({ habit, onToggle, onLongPress }: { habit: Habit; onToggle: (id: string) => void; onLongPress?: (h: Habit) => void }) {
+  const C = useColors()
+  const s = makeStyles(C)
   const stats = computeStats(habit.history, habit.frequency)
   const done = isDoneToday(habit.history)
   return (
@@ -70,11 +78,10 @@ export function HabitRow({ habit, onToggle, onLongPress }: { habit: Habit; onTog
   )
 }
 
-const s = StyleSheet.create({
-  h1: { fontFamily: FONT.display, fontSize: 25, color: C.forest },
+const makeStyles = (C: Palette) => StyleSheet.create({
   chip: { paddingHorizontal: 16, paddingVertical: 7, borderRadius: 999, marginRight: 8 },
   btn: { borderRadius: 14, paddingVertical: 13, alignItems: 'center', justifyContent: 'center' },
-  habit: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: C.white, borderRadius: 18, paddingHorizontal: 14, paddingVertical: 12, ...cardShadow },
+  habit: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: C.card, borderRadius: 18, paddingHorizontal: 14, paddingVertical: 12, ...cardShadow },
   habitIcon: { width: 44, height: 44, borderRadius: 14, backgroundColor: C.lightmint, alignItems: 'center', justifyContent: 'center' },
   habitName: { fontSize: 15, fontFamily: FONT.bold, color: C.ink },
   habitMeta: { fontSize: 12, fontFamily: FONT.medium, color: C.muted, marginTop: 2, textTransform: 'capitalize' },

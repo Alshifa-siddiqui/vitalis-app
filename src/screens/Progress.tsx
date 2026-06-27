@@ -1,10 +1,13 @@
 import { ScrollView, View, Text, StyleSheet } from 'react-native'
-import { C, cardShadow, FONT } from '../theme'
+import { cardShadow, FONT, type Palette } from '../theme'
+import { useColors } from '../useColors'
 import { Header } from '../ui'
 import { useStore } from '../store'
 import { computeStats, BADGES } from '../streaks'
 
 function Stat({ value, label }: { value: string | number; label: string }) {
+  const C = useColors()
+  const s = makeStyles(C)
   return (
     <View style={s.stat}>
       <Text style={s.statValue}>{value}</Text>
@@ -14,6 +17,8 @@ function Stat({ value, label }: { value: string | number; label: string }) {
 }
 
 export default function Progress() {
+  const C = useColors()
+  const s = makeStyles(C)
   const habits = useStore((s) => s.habits)
   const stats = habits.map((h) => ({ h, st: computeStats(h.history, h.frequency) }))
   const totalCheckins = stats.reduce((a, x) => a + x.st.completedCount, 0)
@@ -48,8 +53,8 @@ export default function Progress() {
         {stats.map(({ h, st }) => (
           <View key={h.id} style={s.row}>
             <Text style={{ fontSize: 20 }}>{h.icon}</Text>
-            <Text style={{ flex: 1, fontWeight: '700', color: C.ink }} numberOfLines={1}>{h.name}</Text>
-            <Text style={{ color: C.warmgold, fontWeight: '700' }}>🔥 {st.currentStreak}</Text>
+            <Text style={{ flex: 1, fontFamily: FONT.bold, color: C.ink }} numberOfLines={1}>{h.name}</Text>
+            <Text style={{ color: C.warmgold, fontFamily: FONT.bold }}>🔥 {st.currentStreak}</Text>
             <Text style={{ color: C.muted, fontSize: 12 }}>best {st.longestStreak}</Text>
           </View>
         ))}
@@ -59,13 +64,13 @@ export default function Progress() {
   )
 }
 
-const s = StyleSheet.create({
-  stat: { flex: 1, backgroundColor: C.white, borderRadius: 18, padding: 16, alignItems: 'center', ...cardShadow },
+const makeStyles = (C: Palette) => StyleSheet.create({
+  stat: { flex: 1, backgroundColor: C.card, borderRadius: 18, padding: 16, alignItems: 'center', ...cardShadow },
   statValue: { fontFamily: FONT.mono, fontSize: 26, color: C.primary },
   statLabel: { fontSize: 12, fontFamily: FONT.medium, color: C.muted, marginTop: 2 },
   section: { fontFamily: FONT.display, fontSize: 19, color: C.forest, marginTop: 24, marginBottom: 12 },
   badgeWrap: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
-  badge: { width: 90, backgroundColor: C.white, borderRadius: 16, paddingVertical: 14, alignItems: 'center', gap: 4, ...cardShadow },
+  badge: { width: 90, backgroundColor: C.card, borderRadius: 16, paddingVertical: 14, alignItems: 'center', gap: 4, ...cardShadow },
   badgeName: { fontSize: 11, fontFamily: FONT.semibold, color: C.muted, textAlign: 'center' },
-  row: { flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: C.white, borderRadius: 14, paddingHorizontal: 14, paddingVertical: 12, ...cardShadow },
+  row: { flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: C.card, borderRadius: 14, paddingHorizontal: 14, paddingVertical: 12, ...cardShadow },
 })

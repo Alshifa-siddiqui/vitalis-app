@@ -1,10 +1,13 @@
 import { ScrollView, View, Text, StyleSheet } from 'react-native'
-import { C, cardShadow, FONT } from '../theme'
+import { cardShadow, FONT, type Palette } from '../theme'
+import { useColors } from '../useColors'
 import { Ring, HabitRow } from '../ui'
 import { useStore } from '../store'
 import { computeStats, isDoneToday } from '../streaks'
 
 export default function Home() {
+  const C = useColors()
+  const s = makeStyles(C)
   const habits = useStore((s) => s.habits)
   const toggle = useStore((s) => s.toggleToday)
 
@@ -28,7 +31,7 @@ export default function Home() {
         <View style={{ flex: 1, gap: 10 }}>
           <View>
             <Text style={{ color: 'rgba(255,255,255,0.8)', fontSize: 13 }}>Today's Progress</Text>
-            <Text style={{ color: C.mint, fontSize: 15, fontWeight: '700' }}>{done} of {total} done</Text>
+            <Text style={{ color: C.mint, fontSize: 15, fontFamily: FONT.bold }}>{done} of {total} done</Text>
           </View>
           <View style={s.pill}><Text style={s.pillText}>🔥  Best streak: {best}</Text></View>
           <View style={s.pill}><Text style={s.pillText}>📋  Active habits: {total}</Text></View>
@@ -59,12 +62,12 @@ export default function Home() {
   )
 }
 
-const s = StyleSheet.create({
+const makeStyles = (C: Palette) => StyleSheet.create({
   rowBetween: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   h1: { fontFamily: FONT.display, fontSize: 25, color: C.forest },
   h2: { fontFamily: FONT.display, fontSize: 19, color: C.forest },
   avatar: { width: 44, height: 44, borderRadius: 22, backgroundColor: C.primary, alignItems: 'center', justifyContent: 'center' },
-  hero: { flexDirection: 'row', alignItems: 'center', gap: 18, backgroundColor: C.forest, borderRadius: 26, padding: 20, ...cardShadow, shadowOpacity: 0.2, shadowRadius: 16 },
+  hero: { flexDirection: 'row', alignItems: 'center', gap: 18, backgroundColor: C.hero, borderRadius: 26, padding: 20, ...cardShadow, shadowOpacity: 0.2, shadowRadius: 16 },
   pill: { backgroundColor: 'rgba(255,255,255,0.15)', borderRadius: 14, paddingHorizontal: 12, paddingVertical: 9 },
   pillText: { color: C.white, fontSize: 13, fontFamily: FONT.semibold },
   tip: { flexDirection: 'row', gap: 12, backgroundColor: C.lightmint, borderColor: 'rgba(82,183,136,0.3)', borderWidth: 1, borderRadius: 18, padding: 16, marginTop: 18, marginBottom: 22 },

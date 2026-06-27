@@ -3,7 +3,8 @@ import { SafeAreaView, View, Text, Pressable, StyleSheet, StatusBar, ActivityInd
 import { useFonts, PlayfairDisplay_700Bold, PlayfairDisplay_800ExtraBold } from '@expo-google-fonts/playfair-display'
 import { DMSans_400Regular, DMSans_500Medium, DMSans_600SemiBold, DMSans_700Bold } from '@expo-google-fonts/dm-sans'
 import { DMMono_500Medium } from '@expo-google-fonts/dm-mono'
-import { C, FONT } from './src/theme'
+import { FONT, type Palette } from './src/theme'
+import { useColors } from './src/useColors'
 import { AuthProvider, useAuth } from './src/auth'
 import { useCloudSync } from './src/sync'
 import { useStore } from './src/store'
@@ -24,15 +25,23 @@ const TABS = [
 ]
 
 function Splash() {
+  const C = useColors()
   return (
-    <View style={[s.shell, { alignItems: 'center', justifyContent: 'center' }]}>
+    <View style={[makeStyles(C).shell, { alignItems: 'center', justifyContent: 'center' }]}>
       <Text style={{ fontSize: 30 }}>🌿</Text>
       <ActivityIndicator color={C.primary} style={{ marginTop: 12 }} />
     </View>
   )
 }
 
+function Bar() {
+  const dark = useStore((s) => s.dark)
+  return <StatusBar barStyle={dark ? 'light-content' : 'dark-content'} />
+}
+
 function MainShell() {
+  const C = useColors()
+  const s = makeStyles(C)
   const [tab, setTab] = useState('home')
   const active = TABS.find((t) => t.key === tab)!
   const habits = useStore((s) => s.habits)
@@ -40,7 +49,7 @@ function MainShell() {
   useEffect(() => { syncReminders(habits) }, [habits])
   return (
     <SafeAreaView style={s.shell}>
-      <StatusBar barStyle="dark-content" />
+      <Bar />
       <View style={{ flex: 1 }}>{active.screen}</View>
       <View style={s.nav}>
         {TABS.map((t) => {
@@ -58,6 +67,8 @@ function MainShell() {
 }
 
 function Root() {
+  const C = useColors()
+  const s = makeStyles(C)
   const { loading, configured, session, user } = useAuth()
   const [demo, setDemo] = useState(false)
   useCloudSync(user?.id)
@@ -67,7 +78,7 @@ function Root() {
   if (needAuth) {
     return (
       <SafeAreaView style={s.shell}>
-        <StatusBar barStyle="dark-content" />
+        <Bar />
         <Auth onDemo={() => setDemo(true)} />
       </SafeAreaView>
     )
@@ -89,8 +100,8 @@ export default function App() {
   )
 }
 
-const s = StyleSheet.create({
+const makeStyles = (C: Palette) => StyleSheet.create({
   shell: { flex: 1, backgroundColor: C.canvas, maxWidth: 480, width: '100%', alignSelf: 'center' },
-  nav: { flexDirection: 'row', borderTopWidth: 1, borderTopColor: 'rgba(0,0,0,0.05)', backgroundColor: C.white, paddingVertical: 8, paddingHorizontal: 8 },
+  nav: { flexDirection: 'row', borderTopWidth: 1, borderTopColor: C.muted + '22', backgroundColor: C.card, paddingVertical: 8, paddingHorizontal: 8 },
   navItem: { flex: 1, alignItems: 'center', gap: 3, paddingVertical: 4 },
 })
