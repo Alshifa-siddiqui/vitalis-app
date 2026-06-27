@@ -1,6 +1,13 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
+import { Platform } from 'react-native'
+import * as WebBrowser from 'expo-web-browser'
+import { makeRedirectUri } from 'expo-auth-session'
+import * as QueryParams from 'expo-auth-session/build/QueryParams'
 import type { Session, User } from '@supabase/supabase-js'
 import { supabase, isConfigured } from './supabase'
+
+// Lets the in-app browser dismiss itself after the OAuth redirect (web).
+WebBrowser.maybeCompleteAuthSession()
 
 type AuthValue = {
   session: Session | null
@@ -46,8 +53,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return error ? { error: error.message } : {}
     },
     signInWithProvider: async (provider) => {
-      const { error } = await supabase.auth.signInWithOAuth({ provider })
-      return error ? { error: error.message } : {}
+      // Web: a normal full-page redirect handles everything.
+      if (Platform.OS === 'web') {
+        const { error } = await supabase.auth.signInWithOAuth({ provider })
+        return error ? { error: error.message } : {}
+      }
+      // Native: open the provider in an in-app browser, then capture the
+      // redirect back to our scheme and establish the session manually.
+      const redirectTo = makeRedirectUri({ scheme: 'vitalis', path: 'auth/callback' })
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider,
+        options: { redirectTo, skipBrowserRedirect: true },
+      })
+      if (error) return { error: error.message }
+      if (!data?.url) return { error: 'Could not start sign-in.' }
+      const result = await WebBrowser.openAuthSessionAsync(data.url, redirectTo)
+      if (result.type !== 'success') return {} // user cancelled
+      const { params, errorCode } = QueryParams.getQueryParams(result.url)
+      if (errorCode) return { error: errorCode }
+      const { access_token, refresh_token } = params
+      if (!access_token) return { error: 'No session returned.' }
+      const { error: sessErr } = await supabase.auth.setSession({ access_token, refresh_token })
+      return sessErr ? { error: sessErr.message } : {}
     },
     signOut: async () => {
       await supabase.auth.signOut()
