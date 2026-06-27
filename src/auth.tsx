@@ -14,7 +14,7 @@ type AuthValue = {
   user: User | null
   loading: boolean
   configured: boolean
-  signUp: (email: string, password: string) => Promise<{ error?: string }>
+  signUp: (email: string, password: string) => Promise<{ error?: string; needsConfirm?: boolean }>
   signIn: (email: string, password: string) => Promise<{ error?: string }>
   signInWithProvider: (provider: 'google' | 'apple') => Promise<{ error?: string }>
   signOut: () => Promise<void>
@@ -45,8 +45,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     loading,
     configured: isConfigured,
     signUp: async (email, password) => {
-      const { error } = await supabase.auth.signUp({ email, password })
-      return error ? { error: error.message } : {}
+      const { data, error } = await supabase.auth.signUp({ email, password })
+      if (error) return { error: error.message }
+      // If email confirmation is on, no session is returned until confirmed.
+      return { needsConfirm: !data.session }
     },
     signIn: async (email, password) => {
       const { error } = await supabase.auth.signInWithPassword({ email, password })

@@ -11,14 +11,22 @@ export default function Auth({ onDemo }: { onDemo: () => void }) {
   const [password, setPassword] = useState('')
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
+  const [notice, setNotice] = useState('')
 
   const submit = async () => {
-    setError('')
+    setError(''); setNotice('')
     if (!email.trim() || !password) return setError('Enter your email and password.')
+    if (mode === 'up' && password.length < 6) return setError('Password must be at least 6 characters.')
     setBusy(true)
     const res = mode === 'in' ? await signIn(email.trim(), password) : await signUp(email.trim(), password)
     setBusy(false)
-    if (res.error) setError(res.error)
+    if (res.error) return setError(res.error)
+    // signUp with email confirmation on: no session yet — tell the user.
+    if (mode === 'up' && 'needsConfirm' in res && res.needsConfirm) {
+      setNotice('Account created! Check your email to confirm, then sign in.')
+      setMode('in')
+    }
+    // Otherwise a session is set and the app advances automatically.
   }
 
   const social = async (p: 'google' | 'apple') => {
@@ -45,6 +53,7 @@ export default function Auth({ onDemo }: { onDemo: () => void }) {
           secureTextEntry style={s.input} />
 
         {error ? <Text style={s.error}>{error}</Text> : null}
+        {notice ? <Text style={s.notice}>{notice}</Text> : null}
 
         <View style={{ height: 14 }} />
         {busy
@@ -87,6 +96,7 @@ const s = StyleSheet.create({
   label: { fontSize: 13, fontFamily: FONT.bold, color: C.muted, marginTop: 14, marginBottom: 6 },
   input: { backgroundColor: C.canvas, borderRadius: 14, paddingHorizontal: 14, paddingVertical: 12, fontSize: 16, fontFamily: FONT.sans, color: C.ink, borderWidth: 1, borderColor: 'rgba(0,0,0,0.06)' },
   error: { color: C.error, fontFamily: FONT.medium, fontSize: 13, marginTop: 12 },
+  notice: { color: C.mid, fontFamily: FONT.semibold, fontSize: 13, marginTop: 12 },
   switch: { color: C.primary, fontFamily: FONT.semibold, fontSize: 14, textAlign: 'center' },
   divider: { flexDirection: 'row', alignItems: 'center', marginVertical: 18 },
   line: { flex: 1, height: 1, backgroundColor: 'rgba(0,0,0,0.08)' },
