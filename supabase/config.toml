@@ -1,0 +1,4 @@
+project_id = "vitalis-app"
+
+[functions.ai-insight]
+verify_jwt = true
