@@ -4,6 +4,9 @@ import { useFonts, PlayfairDisplay_700Bold, PlayfairDisplay_800ExtraBold } from 
 import { DMSans_400Regular, DMSans_500Medium, DMSans_600SemiBold, DMSans_700Bold } from '@expo-google-fonts/dm-sans'
 import { DMMono_500Medium } from '@expo-google-fonts/dm-mono'
 import { C, FONT } from './src/theme'
+import { AuthProvider, useAuth } from './src/auth'
+import { useCloudSync } from './src/sync'
+import Auth from './src/screens/Auth'
 import Home from './src/screens/Home'
 import Habits from './src/screens/Habits'
 import Health from './src/screens/Health'
@@ -18,24 +21,18 @@ const TABS = [
   { key: 'profile', label: 'Profile', icon: '☻', screen: <Profile /> },
 ]
 
-export default function App() {
+function Splash() {
+  return (
+    <View style={[s.shell, { alignItems: 'center', justifyContent: 'center' }]}>
+      <Text style={{ fontSize: 30 }}>🌿</Text>
+      <ActivityIndicator color={C.primary} style={{ marginTop: 12 }} />
+    </View>
+  )
+}
+
+function MainShell() {
   const [tab, setTab] = useState('home')
   const active = TABS.find((t) => t.key === tab)!
-  const [fontsLoaded] = useFonts({
-    PlayfairDisplay_700Bold, PlayfairDisplay_800ExtraBold,
-    DMSans_400Regular, DMSans_500Medium, DMSans_600SemiBold, DMSans_700Bold,
-    DMMono_500Medium,
-  })
-
-  if (!fontsLoaded) {
-    return (
-      <View style={[s.shell, { alignItems: 'center', justifyContent: 'center' }]}>
-        <Text style={{ fontSize: 30 }}>🌿</Text>
-        <ActivityIndicator color={C.primary} style={{ marginTop: 12 }} />
-      </View>
-    )
-  }
-
   return (
     <SafeAreaView style={s.shell}>
       <StatusBar barStyle="dark-content" />
@@ -52,6 +49,38 @@ export default function App() {
         })}
       </View>
     </SafeAreaView>
+  )
+}
+
+function Root() {
+  const { loading, configured, session, user } = useAuth()
+  const [demo, setDemo] = useState(false)
+  useCloudSync(user?.id)
+
+  if (loading) return <Splash />
+  const needAuth = configured ? !session : !demo
+  if (needAuth) {
+    return (
+      <SafeAreaView style={s.shell}>
+        <StatusBar barStyle="dark-content" />
+        <Auth onDemo={() => setDemo(true)} />
+      </SafeAreaView>
+    )
+  }
+  return <MainShell />
+}
+
+export default function App() {
+  const [fontsLoaded] = useFonts({
+    PlayfairDisplay_700Bold, PlayfairDisplay_800ExtraBold,
+    DMSans_400Regular, DMSans_500Medium, DMSans_600SemiBold, DMSans_700Bold,
+    DMMono_500Medium,
+  })
+  if (!fontsLoaded) return <Splash />
+  return (
+    <AuthProvider>
+      <Root />
+    </AuthProvider>
   )
 }
 
