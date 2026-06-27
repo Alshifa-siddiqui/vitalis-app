@@ -11,6 +11,7 @@ export type Habit = {
   category: string
   createdAt: string
   history: string[] // ISO dates of check-ins
+  reminderTime?: string // "HH:MM" local time, or undefined for no reminder
 }
 
 function isoDaysAgo(n: number): string {
@@ -32,7 +33,7 @@ const SEED: Habit[] = [
   { id: 's5', name: 'Sleep by 11pm', icon: '😴', frequency: 'daily', category: 'Health', createdAt: isoDaysAgo(30), history: run(4, 1) },
 ]
 
-export type NewHabit = { name: string; icon: string; frequency: Frequency; category: string }
+export type NewHabit = { name: string; icon: string; frequency: Frequency; category: string; reminderTime?: string }
 
 type State = {
   habits: Habit[]

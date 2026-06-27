@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { SafeAreaView, View, Text, Pressable, StyleSheet, StatusBar, ActivityIndicator } from 'react-native'
 import { useFonts, PlayfairDisplay_700Bold, PlayfairDisplay_800ExtraBold } from '@expo-google-fonts/playfair-display'
 import { DMSans_400Regular, DMSans_500Medium, DMSans_600SemiBold, DMSans_700Bold } from '@expo-google-fonts/dm-sans'
@@ -6,6 +6,8 @@ import { DMMono_500Medium } from '@expo-google-fonts/dm-mono'
 import { C, FONT } from './src/theme'
 import { AuthProvider, useAuth } from './src/auth'
 import { useCloudSync } from './src/sync'
+import { useStore } from './src/store'
+import { syncReminders } from './src/reminders'
 import Auth from './src/screens/Auth'
 import Home from './src/screens/Home'
 import Habits from './src/screens/Habits'
@@ -33,6 +35,9 @@ function Splash() {
 function MainShell() {
   const [tab, setTab] = useState('home')
   const active = TABS.find((t) => t.key === tab)!
+  const habits = useStore((s) => s.habits)
+  // Reschedule daily reminders whenever habits (and their reminder times) change.
+  useEffect(() => { syncReminders(habits) }, [habits])
   return (
     <SafeAreaView style={s.shell}>
       <StatusBar barStyle="dark-content" />

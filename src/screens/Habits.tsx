@@ -6,6 +6,7 @@ import { useStore, type Habit } from '../store'
 import type { Frequency } from '../streaks'
 
 const FREQS: Frequency[] = ['daily', 'weekly', 'monthly']
+const REMIND = ['Off', '07:00', '08:00', '12:00', '18:00', '21:00']
 
 export default function Habits() {
   const habits = useStore((s) => s.habits)
@@ -21,20 +22,22 @@ export default function Habits() {
   const [icon, setIcon] = useState(ICON_CHOICES[0])
   const [freq, setFreq] = useState<Frequency>('daily')
   const [cat, setCat] = useState(CATEGORIES[0])
+  const [remind, setRemind] = useState('Off')
 
   const cats = ['All', ...CATEGORIES]
   const shown = filter === 'All' ? habits : habits.filter((h) => h.category === filter)
 
   const openAdd = () => {
-    setEditing(null); setName(''); setIcon(ICON_CHOICES[0]); setFreq('daily'); setCat(CATEGORIES[0]); setOpen(true)
+    setEditing(null); setName(''); setIcon(ICON_CHOICES[0]); setFreq('daily'); setCat(CATEGORIES[0]); setRemind('Off'); setOpen(true)
   }
   const openEdit = (h: Habit) => {
-    setEditing(h); setName(h.name); setIcon(h.icon); setFreq(h.frequency); setCat(h.category); setOpen(true)
+    setEditing(h); setName(h.name); setIcon(h.icon); setFreq(h.frequency); setCat(h.category); setRemind(h.reminderTime || 'Off'); setOpen(true)
   }
   const save = () => {
     if (!name.trim()) return
-    if (editing) updateHabit(editing.id, { name: name.trim(), icon, frequency: freq, category: cat })
-    else addHabit({ name: name.trim(), icon, frequency: freq, category: cat })
+    const reminderTime = remind === 'Off' ? undefined : remind
+    if (editing) updateHabit(editing.id, { name: name.trim(), icon, frequency: freq, category: cat, reminderTime })
+    else addHabit({ name: name.trim(), icon, frequency: freq, category: cat, reminderTime })
     setOpen(false)
   }
   const remove = () => { if (editing) { deleteHabit(editing.id); setOpen(false) } }
@@ -85,6 +88,11 @@ export default function Habits() {
               <Text style={s.label}>Category</Text>
               <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
                 {CATEGORIES.map((cc) => <Chip key={cc} label={cc} active={cat === cc} onPress={() => setCat(cc)} />)}
+              </View>
+
+              <Text style={s.label}>Reminder</Text>
+              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+                {REMIND.map((r) => <Chip key={r} label={r} active={remind === r} onPress={() => setRemind(r)} />)}
               </View>
 
               <View style={{ height: 18 }} />
