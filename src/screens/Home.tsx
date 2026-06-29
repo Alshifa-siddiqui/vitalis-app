@@ -10,6 +10,7 @@ export default function Home() {
   const s = makeStyles(C)
   const habits = useStore((s) => s.habits)
   const toggle = useStore((s) => s.toggleToday)
+  const name = useStore((s) => s.profileName) || 'Friend'
 
   const done = habits.filter((h) => isDoneToday(h.history)).length
   const total = habits.length
@@ -21,9 +22,9 @@ export default function Home() {
       <View style={[s.rowBetween, { marginBottom: 18 }]}>
         <View>
           <Text style={{ color: C.muted, fontSize: 14 }}>Good morning 🌿</Text>
-          <Text style={s.h1}>Sarah Johnson</Text>
+          <Text style={s.h1}>{name}</Text>
         </View>
-        <View style={s.avatar}><Text style={{ color: C.white, fontSize: 18, fontWeight: '700' }}>S</Text></View>
+        <View style={s.avatar}><Text style={{ color: C.white, fontSize: 18, fontWeight: '700' }}>{name[0].toUpperCase()}</Text></View>
       </View>
 
       <View style={s.hero}>

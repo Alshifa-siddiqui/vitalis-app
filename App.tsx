@@ -45,8 +45,11 @@ function MainShell() {
   const [tab, setTab] = useState('home')
   const active = TABS.find((t) => t.key === tab)!
   const habits = useStore((s) => s.habits)
-  // Reschedule daily reminders whenever habits (and their reminder times) change.
-  useEffect(() => { syncReminders(habits) }, [habits])
+  const notificationsEnabled = useStore((s) => s.notificationsEnabled)
+  // Reschedule daily reminders when habits change; clear them when disabled.
+  useEffect(() => {
+    syncReminders(notificationsEnabled ? habits : [])
+  }, [habits, notificationsEnabled])
   return (
     <SafeAreaView style={s.shell}>
       <Bar />

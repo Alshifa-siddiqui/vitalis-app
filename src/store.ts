@@ -35,14 +35,30 @@ const SEED: Habit[] = [
 
 export type NewHabit = { name: string; icon: string; frequency: Frequency; category: string; reminderTime?: string }
 
+export type HealthProfile = {
+  age: string; weightKg: string; heightCm: string
+  sleepGoal: string; waterGoal: string; conditions: string
+}
+
+const EMPTY_HEALTH: HealthProfile = {
+  age: '', weightKg: '', heightCm: '', sleepGoal: '8', waterGoal: '8', conditions: '',
+}
+
 type State = {
   habits: Habit[]
   dark: boolean
+  profileName: string
+  health: HealthProfile
+  notificationsEnabled: boolean
   addHabit: (h: NewHabit) => void
   updateHabit: (id: string, patch: Partial<Habit>) => void
   deleteHabit: (id: string) => void
   toggleToday: (id: string) => void
   toggleDark: () => void
+  setProfileName: (n: string) => void
+  setHealth: (patch: Partial<HealthProfile>) => void
+  setNotificationsEnabled: (v: boolean) => void
+  clearAll: () => void
   resetAll: () => void
 }
 
@@ -51,7 +67,14 @@ export const useStore = create<State>()(
     (set) => ({
       habits: SEED,
       dark: false,
+      profileName: '',
+      health: EMPTY_HEALTH,
+      notificationsEnabled: true,
       toggleDark: () => set((s) => ({ dark: !s.dark })),
+      setProfileName: (n) => set({ profileName: n }),
+      setHealth: (patch) => set((s) => ({ health: { ...s.health, ...patch } })),
+      setNotificationsEnabled: (v) => set({ notificationsEnabled: v }),
+      clearAll: () => set({ habits: [] }),
       addHabit: (h) =>
         set((s) => ({ habits: [...s.habits, { id: uid(), createdAt: todayISO(), history: [], ...h }] })),
       updateHabit: (id, patch) =>
