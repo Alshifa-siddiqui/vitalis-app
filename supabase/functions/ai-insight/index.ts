@@ -30,8 +30,11 @@ Deno.serve(async (req) => {
   if (!apiKey) return json({ error: "AI is not configured on the server yet." }, 503)
 
   let habits: HabitSummary[] = []
+  let goals: string[] = []
   try {
-    habits = (await req.json())?.habits ?? []
+    const body = await req.json()
+    habits = body?.habits ?? []
+    goals = Array.isArray(body?.goals) ? body.goals : []
   } catch {
     return json({ error: "Invalid request body." }, 400)
   }
@@ -40,6 +43,9 @@ Deno.serve(async (req) => {
   const summary = habits
     .map((h) => `- ${h.name} (${h.frequency}, ${h.category}): ${h.completedCount} total check-ins, current streak ${h.currentStreak}, best ${h.longestStreak}`)
     .join("\n")
+  const goalLine = goals.length
+    ? `\n\nThe user's stated focus goals are: ${goals.join(", ")}. Tailor your suggestion toward these where it fits.`
+    : ""
 
   try {
     const anthropic = new Anthropic({ apiKey })
@@ -53,7 +59,7 @@ Deno.serve(async (req) => {
         "This is general wellness encouragement, NOT medical advice — never diagnose or prescribe. " +
         "Reply in plain text (no markdown headings), under 120 words.",
       messages: [
-        { role: "user", content: `Here are my habits:\n${summary}\n\nGive me a short personalized insight.` },
+        { role: "user", content: `Here are my habits:\n${summary}${goalLine}\n\nGive me a short personalized insight.` },
       ],
     })
     const insight = msg.content

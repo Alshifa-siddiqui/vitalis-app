@@ -35,6 +35,16 @@ const SEED: Habit[] = [
 
 export type NewHabit = { name: string; icon: string; frequency: Frequency; category: string; reminderTime?: string }
 
+// Starter habit suggested for each onboarding goal.
+const STARTER: Record<string, NewHabit> = {
+  Fitness: { name: 'Morning Workout', icon: '🏃', frequency: 'daily', category: 'Fitness' },
+  Sleep: { name: 'Sleep by 11pm', icon: '😴', frequency: 'daily', category: 'Health' },
+  Nutrition: { name: 'Eat Healthy', icon: '🥗', frequency: 'daily', category: 'Health' },
+  Mindfulness: { name: 'Meditate', icon: '🧘', frequency: 'daily', category: 'Mental' },
+  Learning: { name: 'Read 20 Pages', icon: '📖', frequency: 'daily', category: 'Learning' },
+  Hydration: { name: 'Drink Water', icon: '💧', frequency: 'daily', category: 'Health' },
+}
+
 export type HealthProfile = {
   age: string; weightKg: string; heightCm: string
   sleepGoal: string; waterGoal: string; conditions: string
@@ -75,7 +85,15 @@ export const useStore = create<State>()(
       notificationsEnabled: true,
       onboarded: false,
       goals: [],
-      completeOnboarding: (goals) => set({ onboarded: true, goals }),
+      completeOnboarding: (goals) =>
+        set((s) => {
+          const existing = new Set(s.habits.map((h) => h.name.toLowerCase()))
+          const starters = goals
+            .map((g) => STARTER[g])
+            .filter((h): h is NewHabit => !!h && !existing.has(h.name.toLowerCase()))
+            .map((h) => ({ id: uid(), createdAt: todayISO(), history: [], ...h }))
+          return { onboarded: true, goals, habits: [...s.habits, ...starters] }
+        }),
       toggleDark: () => set((s) => ({ dark: !s.dark })),
       setProfileName: (n) => set({ profileName: n }),
       setHealth: (patch) => set((s) => ({ health: { ...s.health, ...patch } })),

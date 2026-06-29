@@ -21,8 +21,9 @@ export async function getAIInsight(
     }
   })
 
+  const goals = useStore.getState().goals
   const { data, error } = await supabase.functions.invoke('ai-insight', {
-    body: { habits: payload },
+    body: { habits: payload, goals },
   })
   if (error) return { error: error.message }
   if (data?.error) return { error: data.error }
