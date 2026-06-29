@@ -50,6 +50,9 @@ type State = {
   profileName: string
   health: HealthProfile
   notificationsEnabled: boolean
+  onboarded: boolean
+  goals: string[]
+  completeOnboarding: (goals: string[]) => void
   addHabit: (h: NewHabit) => void
   updateHabit: (id: string, patch: Partial<Habit>) => void
   deleteHabit: (id: string) => void
@@ -70,6 +73,9 @@ export const useStore = create<State>()(
       profileName: '',
       health: EMPTY_HEALTH,
       notificationsEnabled: true,
+      onboarded: false,
+      goals: [],
+      completeOnboarding: (goals) => set({ onboarded: true, goals }),
       toggleDark: () => set((s) => ({ dark: !s.dark })),
       setProfileName: (n) => set({ profileName: n }),
       setHealth: (patch) => set((s) => ({ health: { ...s.health, ...patch } })),

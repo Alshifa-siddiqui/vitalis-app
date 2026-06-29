@@ -1,9 +1,10 @@
 import { useState } from 'react'
-import { View, Text, ScrollView, Pressable, Modal, TextInput, StyleSheet } from 'react-native'
+import { View, Text, ScrollView, Pressable, Modal, TextInput, StyleSheet, RefreshControl } from 'react-native'
 import { cardShadow, ICON_CHOICES, CATEGORIES, FONT, type Palette } from '../theme'
 import { useColors } from '../useColors'
-import { Chip, PrimaryButton, HabitRow, Header } from '../ui'
+import { Chip, PrimaryButton, HabitRow, Header, EmptyState } from '../ui'
 import { useStore, type Habit } from '../store'
+import { usePullRefresh } from '../sync'
 import type { Frequency } from '../streaks'
 
 const FREQS: Frequency[] = ['daily', 'weekly', 'monthly']
@@ -12,6 +13,7 @@ const REMIND = ['Off', '07:00', '08:00', '12:00', '18:00', '21:00']
 export default function Habits() {
   const C = useColors()
   const s = makeStyles(C)
+  const { refreshing, onRefresh } = usePullRefresh()
   const habits = useStore((s) => s.habits)
   const toggle = useStore((s) => s.toggleToday)
   const addHabit = useStore((s) => s.addHabit)
@@ -47,16 +49,17 @@ export default function Habits() {
 
   return (
     <View style={{ flex: 1 }}>
-      <ScrollView contentContainerStyle={{ padding: 20, paddingBottom: 96 }} showsVerticalScrollIndicator={false}>
+      <ScrollView contentContainerStyle={{ padding: 20, paddingBottom: 96 }} showsVerticalScrollIndicator={false}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={C.primary} colors={[C.primary]} />}>
         <Header title="My Habits" />
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 16 }}>
           {cats.map((c) => <Chip key={c} label={c} active={filter === c} onPress={() => setFilter(c)} />)}
         </ScrollView>
         <View style={{ gap: 10 }}>
           {shown.map((h) => <HabitRow key={h.id} habit={h} onToggle={toggle} onLongPress={openEdit} />)}
-          {shown.length === 0 && <Text style={{ color: C.muted, textAlign: 'center', marginTop: 24 }}>No habits here yet.</Text>}
+          {shown.length === 0 && <EmptyState emoji="🌿" title="No habits here" subtitle="Tap the + button to add your first habit." />}
         </View>
-        <Text style={{ color: C.muted, fontSize: 12, textAlign: 'center', marginTop: 16 }}>Tip: tap to check in · long-press to edit</Text>
+        {shown.length > 0 && <Text style={{ color: C.muted, fontSize: 12, textAlign: 'center', marginTop: 16 }}>Tip: tap to check in · long-press to edit</Text>}
       </ScrollView>
 
       <Pressable style={s.fab} onPress={openAdd}>

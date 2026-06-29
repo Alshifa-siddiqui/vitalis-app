@@ -58,6 +58,19 @@ export function Header({ title, subtitle }: { title: string; subtitle?: string }
   )
 }
 
+export function EmptyState({ emoji, title, subtitle }: { emoji: string; title: string; subtitle: string }) {
+  const C = useColors()
+  return (
+    <View style={{ alignItems: 'center', paddingVertical: 44, paddingHorizontal: 24 }}>
+      <View style={{ width: 88, height: 88, borderRadius: 28, backgroundColor: C.lightmint, alignItems: 'center', justifyContent: 'center' }}>
+        <Text style={{ fontSize: 42 }}>{emoji}</Text>
+      </View>
+      <Text style={{ fontFamily: FONT.display, fontSize: 19, color: C.forest, marginTop: 16 }}>{title}</Text>
+      <Text style={{ color: C.muted, fontSize: 14, textAlign: 'center', marginTop: 6, lineHeight: 20 }}>{subtitle}</Text>
+    </View>
+  )
+}
+
 export function HabitRow({ habit, onToggle, onLongPress }: { habit: Habit; onToggle: (id: string) => void; onLongPress?: (h: Habit) => void }) {
   const C = useColors()
   const s = makeStyles(C)

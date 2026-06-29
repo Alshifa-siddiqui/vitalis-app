@@ -1,7 +1,7 @@
 import { ScrollView, View, Text, StyleSheet } from 'react-native'
 import { cardShadow, FONT, type Palette } from '../theme'
 import { useColors } from '../useColors'
-import { Header } from '../ui'
+import { Header, EmptyState } from '../ui'
 import { useStore } from '../store'
 import { computeStats, BADGES } from '../streaks'
 
@@ -58,7 +58,7 @@ export default function Progress() {
             <Text style={{ color: C.muted, fontSize: 12 }}>best {st.longestStreak}</Text>
           </View>
         ))}
-        {habits.length === 0 && <Text style={{ color: C.muted, textAlign: 'center' }}>Add habits to see progress.</Text>}
+        {habits.length === 0 && <EmptyState emoji="📈" title="Nothing to track yet" subtitle="Add a habit and check in to see your progress grow." />}
       </View>
     </ScrollView>
   )

@@ -9,7 +9,9 @@ import { AuthProvider, useAuth } from './src/auth'
 import { useCloudSync } from './src/sync'
 import { useStore } from './src/store'
 import { syncReminders } from './src/reminders'
+import { Lotus } from './src/Lotus'
 import Auth from './src/screens/Auth'
+import Onboarding from './src/screens/Onboarding'
 import Home from './src/screens/Home'
 import Habits from './src/screens/Habits'
 import Health from './src/screens/Health'
@@ -28,8 +30,8 @@ function Splash() {
   const C = useColors()
   return (
     <View style={[makeStyles(C).shell, { alignItems: 'center', justifyContent: 'center' }]}>
-      <Text style={{ fontSize: 30 }}>🌿</Text>
-      <ActivityIndicator color={C.primary} style={{ marginTop: 12 }} />
+      <Lotus size={110} color={C.secondary} />
+      <ActivityIndicator color={C.primary} style={{ marginTop: 8 }} />
     </View>
   )
 }
@@ -74,6 +76,7 @@ function Root() {
   const s = makeStyles(C)
   const { loading, configured, session, user } = useAuth()
   const [demo, setDemo] = useState(false)
+  const onboarded = useStore((st) => st.onboarded)
   useCloudSync(user?.id)
 
   if (loading) return <Splash />
@@ -83,6 +86,14 @@ function Root() {
       <SafeAreaView style={s.shell}>
         <Bar />
         <Auth onDemo={() => setDemo(true)} />
+      </SafeAreaView>
+    )
+  }
+  if (!onboarded) {
+    return (
+      <SafeAreaView style={s.shell}>
+        <Bar />
+        <Onboarding />
       </SafeAreaView>
     )
   }

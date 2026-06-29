@@ -1,5 +1,6 @@
-import { useEffect } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { supabase, isConfigured } from './supabase'
+import { useAuth } from './auth'
 import { useStore, type Habit } from './store'
 
 // Maps a Supabase row to the local Habit shape.
@@ -34,6 +35,18 @@ export async function pushHabits(userId: string, habits: Habit[]): Promise<void>
   const localIds = new Set(habits.map((h) => h.id))
   const stale = (data ?? []).map((r) => r.id).filter((id) => !localIds.has(id))
   if (stale.length) await supabase.from('habits').delete().in('id', stale)
+}
+
+// Pull-to-refresh: re-fetch this user's habits from the cloud.
+export function usePullRefresh() {
+  const { user } = useAuth()
+  const [refreshing, setRefreshing] = useState(false)
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true)
+    if (isConfigured && user?.id) await pullHabits(user.id)
+    setRefreshing(false)
+  }, [user?.id])
+  return { refreshing, onRefresh }
 }
 
 // Pull on login, then push (debounced) whenever local habits change.

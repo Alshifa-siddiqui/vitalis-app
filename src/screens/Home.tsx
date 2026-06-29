@@ -1,13 +1,15 @@
-import { ScrollView, View, Text, StyleSheet } from 'react-native'
+import { ScrollView, View, Text, StyleSheet, RefreshControl } from 'react-native'
 import { cardShadow, FONT, type Palette } from '../theme'
 import { useColors } from '../useColors'
-import { Ring, HabitRow } from '../ui'
+import { Ring, HabitRow, EmptyState } from '../ui'
 import { useStore } from '../store'
+import { usePullRefresh } from '../sync'
 import { computeStats, isDoneToday } from '../streaks'
 
 export default function Home() {
   const C = useColors()
   const s = makeStyles(C)
+  const { refreshing, onRefresh } = usePullRefresh()
   const habits = useStore((s) => s.habits)
   const toggle = useStore((s) => s.toggleToday)
   const name = useStore((s) => s.profileName) || 'Friend'
@@ -18,7 +20,8 @@ export default function Home() {
   const best = habits.reduce((m, h) => Math.max(m, computeStats(h.history, h.frequency).currentStreak), 0)
 
   return (
-    <ScrollView contentContainerStyle={{ padding: 20, paddingBottom: 28 }} showsVerticalScrollIndicator={false}>
+    <ScrollView contentContainerStyle={{ padding: 20, paddingBottom: 28 }} showsVerticalScrollIndicator={false}
+      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={C.primary} colors={[C.primary]} />}>
       <View style={[s.rowBetween, { marginBottom: 18 }]}>
         <View>
           <Text style={{ color: C.muted, fontSize: 14 }}>Good morning 🌿</Text>
@@ -57,7 +60,7 @@ export default function Home() {
       </View>
       <View style={{ gap: 10 }}>
         {habits.map((h) => <HabitRow key={h.id} habit={h} onToggle={toggle} />)}
-        {total === 0 && <Text style={{ color: C.muted, textAlign: 'center', marginTop: 24 }}>No habits yet — add one in the Habits tab.</Text>}
+        {total === 0 && <EmptyState emoji="🌱" title="No habits yet" subtitle="Head to the Habits tab to plant your first one." />}
       </View>
     </ScrollView>
   )
