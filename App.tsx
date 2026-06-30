@@ -6,7 +6,7 @@ import { DMMono_500Medium } from '@expo-google-fonts/dm-mono'
 import { FONT, type Palette } from './src/theme'
 import { useColors } from './src/useColors'
 import { AuthProvider, useAuth } from './src/auth'
-import { useCloudSync } from './src/sync'
+import { useCloudSync, useProfileSync } from './src/sync'
 import { useStore } from './src/store'
 import { syncReminders } from './src/reminders'
 import { Lotus } from './src/Lotus'
@@ -79,6 +79,7 @@ function Root() {
   const [demo, setDemo] = useState(false)
   const onboarded = useStore((st) => st.onboarded)
   useCloudSync(user?.id)
+  useProfileSync(user?.id)
 
   if (loading) return <Splash />
   if (recovering) {

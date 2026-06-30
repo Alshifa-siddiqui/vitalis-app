@@ -37,6 +37,64 @@ export async function pushHabits(userId: string, habits: Habit[]): Promise<void>
   if (stale.length) await supabase.from('habits').delete().in('id', stale)
 }
 
+// ---- Settings/profile sync (name, health, goals, preferences) ----
+export async function pullProfile(userId: string): Promise<void> {
+  if (!isConfigured) return
+  try {
+    const { data, error } = await supabase.from('profiles').select('*').eq('id', userId).maybeSingle()
+    if (error || !data) return
+    const cur = useStore.getState()
+    useStore.setState({
+      profileName: data.name ?? cur.profileName,
+      health: { ...cur.health, ...(data.health ?? {}) },
+      goals: Array.isArray(data.goals) ? data.goals : cur.goals,
+      dark: typeof data.dark === 'boolean' ? data.dark : cur.dark,
+      notificationsEnabled: typeof data.notifications_enabled === 'boolean' ? data.notifications_enabled : cur.notificationsEnabled,
+      onboarded: typeof data.onboarded === 'boolean' ? data.onboarded : cur.onboarded,
+    })
+  } catch { /* profiles table not created yet — no-op */ }
+}
+
+export async function pushProfile(userId: string): Promise<void> {
+  if (!isConfigured) return
+  const s = useStore.getState()
+  try {
+    await supabase.from('profiles').upsert({
+      id: userId,
+      name: s.profileName,
+      health: s.health,
+      goals: s.goals,
+      dark: s.dark,
+      notifications_enabled: s.notificationsEnabled,
+      onboarded: s.onboarded,
+      updated_at: new Date().toISOString(),
+    })
+  } catch { /* profiles table not created yet — no-op */ }
+}
+
+// Pull settings on login, then push (debounced) when any setting changes.
+export function useProfileSync(userId: string | undefined): void {
+  useEffect(() => {
+    if (!isConfigured || !userId) return
+    pullProfile(userId)
+    let t: ReturnType<typeof setTimeout>
+    const unsub = useStore.subscribe((state, prev) => {
+      const changed =
+        state.profileName !== prev.profileName ||
+        state.dark !== prev.dark ||
+        state.notificationsEnabled !== prev.notificationsEnabled ||
+        state.onboarded !== prev.onboarded ||
+        state.health !== prev.health ||
+        state.goals !== prev.goals
+      if (changed) {
+        clearTimeout(t)
+        t = setTimeout(() => pushProfile(userId), 700)
+      }
+    })
+    return () => { clearTimeout(t); unsub() }
+  }, [userId])
+}
+
 // Pull-to-refresh: re-fetch this user's habits from the cloud.
 export function usePullRefresh() {
   const { user } = useAuth()
