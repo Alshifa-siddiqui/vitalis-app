@@ -1,5 +1,7 @@
 // Vitalis design system — light + dark palettes.
 // Brand greens stay constant; neutral surfaces/text flip between modes.
+import { Platform } from 'react-native'
+
 export const LIGHT = {
   forest: '#1B4332',    // headings / brand text
   hero: '#1B4332',      // hero card background (dark green in both modes)
@@ -39,8 +41,6 @@ export const DARK: Palette = {
   muted: '#8AA597',
   white: '#FFFFFF',
 }
-
-import { Platform } from 'react-native'
 
 // Reusable soft card shadow — boxShadow on web (avoids the deprecated shadow*
 // warning), native shadow props on device.

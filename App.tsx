@@ -10,6 +10,7 @@ import { useCloudSync, useProfileSync } from './src/sync'
 import { useStore } from './src/store'
 import { syncReminders } from './src/reminders'
 import { Lotus } from './src/Lotus'
+import { ErrorBoundary } from './src/ErrorBoundary'
 import Auth from './src/screens/Auth'
 import SetNewPassword from './src/screens/SetNewPassword'
 import Onboarding from './src/screens/Onboarding'
@@ -118,9 +119,11 @@ export default function App() {
   })
   if (!fontsLoaded) return <Splash />
   return (
-    <AuthProvider>
-      <Root />
-    </AuthProvider>
+    <ErrorBoundary>
+      <AuthProvider>
+        <Root />
+      </AuthProvider>
+    </ErrorBoundary>
   )
 }
 

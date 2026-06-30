@@ -1,6 +1,6 @@
 import { supabase, isConfigured } from './supabase'
 import { computeStats } from './streaks'
-import type { Habit } from './store'
+import { useStore, type Habit } from './store'
 
 // Calls the secure ai-insight Edge Function (Claude key stays server-side).
 export async function getAIInsight(

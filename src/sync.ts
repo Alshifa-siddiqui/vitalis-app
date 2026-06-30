@@ -103,7 +103,7 @@ export function usePullRefresh() {
     setRefreshing(true)
     if (isConfigured && user?.id) await pullHabits(user.id)
     setRefreshing(false)
-  }, [user?.id])
+  }, [user])
   return { refreshing, onRefresh }
 }
 

@@ -1,0 +1,72 @@
+import { useStore } from '../src/store'
+import { isDoneToday, todayISO } from '../src/streaks'
+
+const get = () => useStore.getState()
+
+beforeEach(() => {
+  get().resetAll() // back to the seed habits
+  useStore.setState({ onboarded: false, goals: [], profileName: '' })
+})
+
+describe('habit CRUD', () => {
+  it('adds a habit with empty history', () => {
+    const before = get().habits.length
+    get().addHabit({ name: 'Stretch', icon: '🤸', frequency: 'daily', category: 'Fitness' })
+    const habits = get().habits
+    expect(habits.length).toBe(before + 1)
+    const added = habits.find((h) => h.name === 'Stretch')!
+    expect(added.history).toEqual([])
+    expect(added.id).toBeTruthy()
+  })
+
+  it('updates and deletes a habit', () => {
+    get().addHabit({ name: 'Temp', icon: '✅', frequency: 'daily', category: 'General' })
+    const id = get().habits.find((h) => h.name === 'Temp')!.id
+    get().updateHabit(id, { name: 'Renamed', frequency: 'weekly' })
+    const h = get().habits.find((x) => x.id === id)!
+    expect(h.name).toBe('Renamed')
+    expect(h.frequency).toBe('weekly')
+    get().deleteHabit(id)
+    expect(get().habits.find((x) => x.id === id)).toBeUndefined()
+  })
+
+  it('clearAll empties habits', () => {
+    get().clearAll()
+    expect(get().habits).toEqual([])
+  })
+})
+
+describe('toggleToday', () => {
+  it('checks in today, then unchecks', () => {
+    const id = get().habits[0].id
+    const wasDone = isDoneToday(get().habits[0].history)
+    get().toggleToday(id)
+    expect(isDoneToday(get().habits.find((h) => h.id === id)!.history)).toBe(!wasDone)
+    get().toggleToday(id)
+    expect(isDoneToday(get().habits.find((h) => h.id === id)!.history)).toBe(wasDone)
+  })
+
+  it('records today in ISO form', () => {
+    get().clearAll()
+    get().addHabit({ name: 'X', icon: '✅', frequency: 'daily', category: 'General' })
+    const id = get().habits[0].id
+    get().toggleToday(id)
+    expect(get().habits[0].history).toContain(todayISO())
+  })
+})
+
+describe('completeOnboarding', () => {
+  it('sets goals + onboarded and seeds starter habits, skipping duplicates', () => {
+    // Seed already contains "Drink Water" (Hydration goal) but not "Morning Workout" (Fitness).
+    const before = get().habits.map((h) => h.name)
+    get().completeOnboarding(['Fitness', 'Hydration'])
+    const after = get().habits.map((h) => h.name)
+    expect(get().onboarded).toBe(true)
+    expect(get().goals).toEqual(['Fitness', 'Hydration'])
+    expect(after).toContain('Morning Workout') // Fitness starter added
+    // Hydration's "Drink Water" already existed → not duplicated
+    expect(after.filter((n) => n === 'Drink Water').length).toBe(
+      before.filter((n) => n === 'Drink Water').length,
+    )
+  })
+})

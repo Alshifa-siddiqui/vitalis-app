@@ -48,7 +48,8 @@ export default function Auth({ onDemo }: { onDemo: () => void }) {
   const resend = async () => {
     reset()
     const res = await resendConfirmation(resendEmail)
-    res.error ? setError(res.error) : setNotice('Confirmation email resent.')
+    if (res.error) setError(res.error)
+    else setNotice('Confirmation email resent.')
   }
 
   const social = async (p: 'google' | 'apple') => {
