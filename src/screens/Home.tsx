@@ -10,7 +10,7 @@ export default function Home() {
   const C = useColors()
   const s = makeStyles(C)
   const { refreshing, onRefresh } = usePullRefresh()
-  const habits = useStore((s) => s.habits)
+  const habits = useStore((s) => s.habits).filter((h) => !h.archived)
   const toggle = useStore((s) => s.toggleToday)
   const name = useStore((s) => s.profileName) || 'Friend'
 

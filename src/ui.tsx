@@ -2,6 +2,7 @@ import { View, Text, Pressable, StyleSheet } from 'react-native'
 import Svg, { Circle } from 'react-native-svg'
 import { cardShadow, FONT, type Palette } from './theme'
 import { useColors } from './useColors'
+import { useNav } from './nav'
 import { computeStats, isDoneToday } from './streaks'
 import type { Habit } from './store'
 
@@ -74,19 +75,21 @@ export function EmptyState({ emoji, title, subtitle }: { emoji: string; title: s
 export function HabitRow({ habit, onToggle, onLongPress }: { habit: Habit; onToggle: (id: string) => void; onLongPress?: (h: Habit) => void }) {
   const C = useColors()
   const s = makeStyles(C)
+  const { openDetail } = useNav()
   const stats = computeStats(habit.history, habit.frequency)
   const done = isDoneToday(habit.history)
   return (
-    <Pressable onPress={() => onToggle(habit.id)} onLongPress={() => onLongPress?.(habit)} style={s.habit}>
+    <Pressable onPress={() => openDetail(habit.id)} onLongPress={() => onLongPress?.(habit)} style={s.habit}>
       <View style={s.habitIcon}><Text style={{ fontSize: 20 }}>{habit.icon}</Text></View>
       <View style={{ flex: 1, minWidth: 0 }}>
         <Text style={[s.habitName, done && { color: C.muted, textDecorationLine: 'line-through' }]} numberOfLines={1}>{habit.name}</Text>
         <Text style={s.habitMeta} numberOfLines={1}>{habit.category} · {habit.frequency}</Text>
       </View>
       {stats.currentStreak > 0 && <Text style={s.streak}>🔥 {stats.currentStreak}</Text>}
-      <View style={[s.check, done ? { backgroundColor: C.success, borderColor: C.success } : { borderColor: C.mint }]}>
+      <Pressable onPress={() => onToggle(habit.id)} hitSlop={8}
+        style={[s.check, done ? { backgroundColor: C.success, borderColor: C.success } : { borderColor: C.mint }]}>
         {done && <Text style={{ color: C.white, fontSize: 14, fontWeight: '900' }}>✓</Text>}
-      </View>
+      </Pressable>
     </Pressable>
   )
 }

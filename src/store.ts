@@ -12,6 +12,7 @@ export type Habit = {
   createdAt: string
   history: string[] // ISO dates of check-ins
   reminderTime?: string // "HH:MM" local time, or undefined for no reminder
+  archived?: boolean
 }
 
 function isoDaysAgo(n: number): string {
@@ -66,6 +67,7 @@ type State = {
   addHabit: (h: NewHabit) => void
   updateHabit: (id: string, patch: Partial<Habit>) => void
   deleteHabit: (id: string) => void
+  toggleArchive: (id: string) => void
   toggleToday: (id: string) => void
   toggleDark: () => void
   setProfileName: (n: string) => void
@@ -104,6 +106,8 @@ export const useStore = create<State>()(
       updateHabit: (id, patch) =>
         set((s) => ({ habits: s.habits.map((x) => (x.id === id ? { ...x, ...patch } : x)) })),
       deleteHabit: (id) => set((s) => ({ habits: s.habits.filter((x) => x.id !== id) })),
+      toggleArchive: (id) =>
+        set((s) => ({ habits: s.habits.map((x) => (x.id === id ? { ...x, archived: !x.archived } : x)) })),
       toggleToday: (id) =>
         set((s) => ({
           habits: s.habits.map((x) => {

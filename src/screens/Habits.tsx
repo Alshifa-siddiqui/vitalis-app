@@ -28,9 +28,14 @@ export default function Habits() {
   const [freq, setFreq] = useState<Frequency>('daily')
   const [cat, setCat] = useState(CATEGORIES[0])
   const [remind, setRemind] = useState('Off')
+  const [search, setSearch] = useState('')
 
-  const cats = ['All', ...CATEGORIES]
-  const shown = filter === 'All' ? habits : habits.filter((h) => h.category === filter)
+  const cats = ['All', ...CATEGORIES, 'Archived']
+  const base = habits.filter((h) =>
+    filter === 'Archived' ? h.archived : !h.archived && (filter === 'All' || h.category === filter),
+  )
+  const q = search.trim().toLowerCase()
+  const shown = q ? base.filter((h) => h.name.toLowerCase().includes(q)) : base
 
   const openAdd = () => {
     setEditing(null); setName(''); setIcon(ICON_CHOICES[0]); setFreq('daily'); setCat(CATEGORIES[0]); setRemind('Off'); setOpen(true)
@@ -52,14 +57,15 @@ export default function Habits() {
       <ScrollView contentContainerStyle={{ padding: 20, paddingBottom: 96 }} showsVerticalScrollIndicator={false}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={C.primary} colors={[C.primary]} />}>
         <Header title="My Habits" />
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 16 }}>
+        <TextInput value={search} onChangeText={setSearch} placeholder="Search habits…" placeholderTextColor={C.muted} style={s.search} />
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginVertical: 14 }}>
           {cats.map((c) => <Chip key={c} label={c} active={filter === c} onPress={() => setFilter(c)} />)}
         </ScrollView>
         <View style={{ gap: 10 }}>
           {shown.map((h) => <HabitRow key={h.id} habit={h} onToggle={toggle} onLongPress={openEdit} />)}
           {shown.length === 0 && <EmptyState emoji="🌿" title="No habits here" subtitle="Tap the + button to add your first habit." />}
         </View>
-        {shown.length > 0 && <Text style={{ color: C.muted, fontSize: 12, textAlign: 'center', marginTop: 16 }}>Tip: tap to check in · long-press to edit</Text>}
+        {shown.length > 0 && <Text style={{ color: C.muted, fontSize: 12, textAlign: 'center', marginTop: 16 }}>Tip: tap for details · tap ○ to check in · long-press to edit</Text>}
       </ScrollView>
 
       <Pressable style={s.fab} onPress={openAdd}>
@@ -116,6 +122,7 @@ export default function Habits() {
 }
 
 const makeStyles = (C: Palette) => StyleSheet.create({
+  search: { backgroundColor: C.card, borderRadius: 14, paddingHorizontal: 14, paddingVertical: 11, fontSize: 15, fontFamily: FONT.sans, color: C.ink, borderWidth: 1, borderColor: C.muted + '33', marginTop: 4 },
   fab: { position: 'absolute', right: 20, bottom: 20, width: 58, height: 58, borderRadius: 29, backgroundColor: C.primary, alignItems: 'center', justifyContent: 'center', ...cardShadow, shadowOpacity: 0.3, shadowRadius: 12 },
   backdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' },
   sheet: { backgroundColor: C.canvas, borderTopLeftRadius: 28, borderTopRightRadius: 28, padding: 22, maxHeight: '88%' },

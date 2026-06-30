@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { SafeAreaView, View, Text, Pressable, StyleSheet, StatusBar, ActivityIndicator } from 'react-native'
+import { SafeAreaView, View, Text, Pressable, StyleSheet, StatusBar, ActivityIndicator, Modal } from 'react-native'
 import { useFonts, PlayfairDisplay_700Bold, PlayfairDisplay_800ExtraBold } from '@expo-google-fonts/playfair-display'
 import { DMSans_400Regular, DMSans_500Medium, DMSans_600SemiBold, DMSans_700Bold } from '@expo-google-fonts/dm-sans'
 import { DMMono_500Medium } from '@expo-google-fonts/dm-mono'
@@ -11,6 +11,8 @@ import { useStore } from './src/store'
 import { syncReminders } from './src/reminders'
 import { Lotus } from './src/Lotus'
 import { ErrorBoundary } from './src/ErrorBoundary'
+import { NavProvider } from './src/nav'
+import HabitDetail from './src/screens/HabitDetail'
 import Auth from './src/screens/Auth'
 import SetNewPassword from './src/screens/SetNewPassword'
 import Onboarding from './src/screens/Onboarding'
@@ -55,21 +57,28 @@ function MainShell() {
     syncReminders(notificationsEnabled ? habits : [])
   }, [habits, notificationsEnabled])
   return (
-    <SafeAreaView style={s.shell}>
-      <Bar />
-      <View style={{ flex: 1 }}>{active.screen}</View>
-      <View style={s.nav}>
-        {TABS.map((t) => {
-          const on = tab === t.key
-          return (
-            <Pressable key={t.key} style={s.navItem} onPress={() => setTab(t.key)}>
-              <Text style={{ fontSize: 18, color: on ? C.primary : C.muted }}>{t.icon}</Text>
-              <Text style={{ fontSize: 10, fontFamily: FONT.semibold, color: on ? C.primary : C.muted }}>{t.label}</Text>
-            </Pressable>
-          )
-        })}
-      </View>
-    </SafeAreaView>
+    <NavProvider>
+      {(nav) => (
+        <SafeAreaView style={s.shell}>
+          <Bar />
+          <View style={{ flex: 1 }}>{active.screen}</View>
+          <View style={s.nav}>
+            {TABS.map((t) => {
+              const on = tab === t.key
+              return (
+                <Pressable key={t.key} style={s.navItem} onPress={() => setTab(t.key)}>
+                  <Text style={{ fontSize: 18, color: on ? C.primary : C.muted }}>{t.icon}</Text>
+                  <Text style={{ fontSize: 10, fontFamily: FONT.semibold, color: on ? C.primary : C.muted }}>{t.label}</Text>
+                </Pressable>
+              )
+            })}
+          </View>
+          <Modal visible={!!nav.detailId} animationType="slide" onRequestClose={nav.closeDetail}>
+            {nav.detailId ? <HabitDetail id={nav.detailId} onClose={nav.closeDetail} /> : null}
+          </Modal>
+        </SafeAreaView>
+      )}
+    </NavProvider>
   )
 }
 
