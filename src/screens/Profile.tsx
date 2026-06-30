@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ScrollView, View, Text, Pressable, TextInput, StyleSheet, KeyboardTypeOptions } from 'react-native'
+import { ScrollView, View, Text, Pressable, TextInput, StyleSheet, ActivityIndicator, KeyboardTypeOptions } from 'react-native'
 import { cardShadow, FONT, type Palette } from '../theme'
 import { useColors } from '../useColors'
 import { Header, PrimaryButton } from '../ui'
@@ -7,7 +7,7 @@ import { useStore } from '../store'
 import { useAuth } from '../auth'
 import { computeStats } from '../streaks'
 
-type Sub = 'main' | 'edit' | 'health' | 'notifications' | 'privacy'
+type Sub = 'main' | 'edit' | 'health' | 'notifications' | 'privacy' | 'changepw' | 'changeemail'
 
 function Toggle({ on, onPress }: { on: boolean; onPress: () => void }) {
   const C = useColors()
@@ -30,14 +30,15 @@ function SubHeader({ title, onBack }: { title: string; onBack: () => void }) {
   )
 }
 
-function Field({ label, value, onChangeText, keyboardType, placeholder }:
-  { label: string; value: string; onChangeText: (t: string) => void; keyboardType?: KeyboardTypeOptions; placeholder?: string }) {
+function Field({ label, value, onChangeText, keyboardType, placeholder, secureTextEntry, autoCapitalize }:
+  { label: string; value: string; onChangeText: (t: string) => void; keyboardType?: KeyboardTypeOptions; placeholder?: string; secureTextEntry?: boolean; autoCapitalize?: 'none' | 'sentences' }) {
   const C = useColors()
   const s = makeStyles(C)
   return (
     <>
       <Text style={s.label}>{label}</Text>
       <TextInput value={value} onChangeText={onChangeText} keyboardType={keyboardType}
+        secureTextEntry={secureTextEntry} autoCapitalize={autoCapitalize}
         placeholder={placeholder} placeholderTextColor={C.muted} style={s.input} />
     </>
   )
@@ -77,6 +78,8 @@ export default function Profile() {
     )
   }
   if (sub === 'privacy') return <PrivacyScreen onBack={() => setSub('main')} onClear={clearAll} configured={configured} />
+  if (sub === 'changepw') return <ChangePassword onBack={() => setSub('main')} />
+  if (sub === 'changeemail') return <ChangeEmail onBack={() => setSub('main')} />
 
   // MAIN
   const totalCheckins = habits.reduce((a, h) => a + computeStats(h.history, h.frequency).completedCount, 0)
@@ -87,6 +90,7 @@ export default function Profile() {
     { label: 'Edit profile', go: 'edit' },
     { label: 'Health profile', go: 'health' },
     { label: 'Notifications', go: 'notifications' },
+    ...(user ? ([{ label: 'Change password', go: 'changepw' }, { label: 'Change email', go: 'changeemail' }] as { label: string; go: Sub }[]) : []),
     { label: 'Privacy & data', go: 'privacy' },
   ]
 
@@ -208,6 +212,65 @@ function PrivacyScreen({ onBack, onClear, configured }: { onBack: () => void; on
       <Text style={{ color: C.muted, fontSize: 12, marginTop: 12, fontFamily: FONT.medium }}>
         This clears your habits and check-ins everywhere. To delete your whole account, sign out and contact support.
       </Text>
+    </ScrollView>
+  )
+}
+
+function ChangePassword({ onBack }: { onBack: () => void }) {
+  const C = useColors()
+  const s = makeStyles(C)
+  const { updatePassword } = useAuth()
+  const [pw, setPw] = useState('')
+  const [busy, setBusy] = useState(false)
+  const [msg, setMsg] = useState('')
+  const [err, setErr] = useState('')
+  const save = async () => {
+    setErr(''); setMsg('')
+    if (pw.length < 6) return setErr('Password must be at least 6 characters.')
+    setBusy(true); const res = await updatePassword(pw); setBusy(false)
+    if (res.error) return setErr(res.error)
+    setPw(''); setMsg('Password updated.')
+  }
+  return (
+    <ScrollView contentContainerStyle={{ padding: 20 }} showsVerticalScrollIndicator={false}>
+      <SubHeader title="Change Password" onBack={onBack} />
+      <View style={s.card2}>
+        <Field label="New password" value={pw} onChangeText={setPw} placeholder="••••••••" secureTextEntry autoCapitalize="none" />
+        {err ? <Text style={{ color: C.error, fontFamily: FONT.medium, fontSize: 13, marginTop: 10 }}>{err}</Text> : null}
+        {msg ? <Text style={{ color: C.success, fontFamily: FONT.semibold, fontSize: 13, marginTop: 10 }}>{msg}</Text> : null}
+        <View style={{ height: 16 }} />
+        {busy ? <ActivityIndicator color={C.primary} /> : <PrimaryButton label="Update password" onPress={save} />}
+      </View>
+    </ScrollView>
+  )
+}
+
+function ChangeEmail({ onBack }: { onBack: () => void }) {
+  const C = useColors()
+  const s = makeStyles(C)
+  const { updateEmail, user } = useAuth()
+  const [email, setEmail] = useState('')
+  const [busy, setBusy] = useState(false)
+  const [msg, setMsg] = useState('')
+  const [err, setErr] = useState('')
+  const save = async () => {
+    setErr(''); setMsg('')
+    if (!email.trim().includes('@')) return setErr('Enter a valid email.')
+    setBusy(true); const res = await updateEmail(email.trim()); setBusy(false)
+    if (res.error) return setErr(res.error)
+    setMsg('Confirmation sent. Check your new inbox to finish the change.')
+  }
+  return (
+    <ScrollView contentContainerStyle={{ padding: 20 }} showsVerticalScrollIndicator={false}>
+      <SubHeader title="Change Email" onBack={onBack} />
+      <View style={s.card2}>
+        <Text style={{ color: C.muted, fontSize: 13, marginBottom: 8, fontFamily: FONT.medium }}>Current: {user?.email ?? '—'}</Text>
+        <Field label="New email" value={email} onChangeText={setEmail} placeholder="you@email.com" keyboardType="email-address" autoCapitalize="none" />
+        {err ? <Text style={{ color: C.error, fontFamily: FONT.medium, fontSize: 13, marginTop: 10 }}>{err}</Text> : null}
+        {msg ? <Text style={{ color: C.success, fontFamily: FONT.semibold, fontSize: 13, marginTop: 10 }}>{msg}</Text> : null}
+        <View style={{ height: 16 }} />
+        {busy ? <ActivityIndicator color={C.primary} /> : <PrimaryButton label="Update email" onPress={save} />}
+      </View>
     </ScrollView>
   )
 }

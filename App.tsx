@@ -11,6 +11,7 @@ import { useStore } from './src/store'
 import { syncReminders } from './src/reminders'
 import { Lotus } from './src/Lotus'
 import Auth from './src/screens/Auth'
+import SetNewPassword from './src/screens/SetNewPassword'
 import Onboarding from './src/screens/Onboarding'
 import Home from './src/screens/Home'
 import Habits from './src/screens/Habits'
@@ -74,12 +75,20 @@ function MainShell() {
 function Root() {
   const C = useColors()
   const s = makeStyles(C)
-  const { loading, configured, session, user } = useAuth()
+  const { loading, configured, session, user, recovering } = useAuth()
   const [demo, setDemo] = useState(false)
   const onboarded = useStore((st) => st.onboarded)
   useCloudSync(user?.id)
 
   if (loading) return <Splash />
+  if (recovering) {
+    return (
+      <SafeAreaView style={s.shell}>
+        <Bar />
+        <SetNewPassword />
+      </SafeAreaView>
+    )
+  }
   const needAuth = configured ? !session : !demo
   if (needAuth) {
     return (

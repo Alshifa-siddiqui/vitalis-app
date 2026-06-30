@@ -9,22 +9,33 @@ import { supabase, isConfigured } from './supabase'
 // Lets the in-app browser dismiss itself after the OAuth redirect (web).
 WebBrowser.maybeCompleteAuthSession()
 
+type Result = { error?: string }
+
 type AuthValue = {
   session: Session | null
   user: User | null
   loading: boolean
   configured: boolean
+  recovering: boolean
   signUp: (email: string, password: string) => Promise<{ error?: string; needsConfirm?: boolean }>
-  signIn: (email: string, password: string) => Promise<{ error?: string }>
-  signInWithProvider: (provider: 'google' | 'apple') => Promise<{ error?: string }>
+  signIn: (email: string, password: string) => Promise<Result>
+  signInWithProvider: (provider: 'google' | 'apple') => Promise<Result>
+  resetPasswordForEmail: (email: string) => Promise<Result>
+  resendConfirmation: (email: string) => Promise<Result>
+  updatePassword: (password: string) => Promise<Result>
+  updateEmail: (email: string) => Promise<Result>
   signOut: () => Promise<void>
+  clearRecovering: () => void
 }
 
 const AuthContext = createContext<AuthValue | undefined>(undefined)
 
+const resetRedirect = makeRedirectUri({ scheme: 'vitalis', path: 'auth/callback' })
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null)
   const [loading, setLoading] = useState(true)
+  const [recovering, setRecovering] = useState(false)
 
   useEffect(() => {
     if (!isConfigured) {
@@ -35,7 +46,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setSession(data.session)
       setLoading(false)
     })
-    const { data: sub } = supabase.auth.onAuthStateChange((_e, s) => setSession(s))
+    const { data: sub } = supabase.auth.onAuthStateChange((event, s) => {
+      setSession(s)
+      if (event === 'PASSWORD_RECOVERY') setRecovering(true)
+    })
     return () => sub.subscription.unsubscribe()
   }, [])
 
@@ -44,6 +58,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     user: session?.user ?? null,
     loading,
     configured: isConfigured,
+    recovering,
+    clearRecovering: () => setRecovering(false),
+    resetPasswordForEmail: async (email) => {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: resetRedirect })
+      return error ? { error: error.message } : {}
+    },
+    resendConfirmation: async (email) => {
+      const { error } = await supabase.auth.resend({ type: 'signup', email })
+      return error ? { error: error.message } : {}
+    },
+    updatePassword: async (password) => {
+      const { error } = await supabase.auth.updateUser({ password })
+      if (error) return { error: error.message }
+      setRecovering(false)
+      return {}
+    },
+    updateEmail: async (email) => {
+      const { error } = await supabase.auth.updateUser({ email })
+      return error ? { error: error.message } : {}
+    },
     signUp: async (email, password) => {
       const { data, error } = await supabase.auth.signUp({ email, password })
       if (error) return { error: error.message }
