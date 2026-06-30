@@ -40,14 +40,20 @@ export const DARK: Palette = {
   white: '#FFFFFF',
 }
 
-// Reusable soft card shadow (iOS + Android + web)
-export const cardShadow = {
-  shadowColor: '#000000',
-  shadowOpacity: 0.08,
-  shadowRadius: 10,
-  shadowOffset: { width: 0, height: 4 },
-  elevation: 2,
-} as const
+import { Platform } from 'react-native'
+
+// Reusable soft card shadow — boxShadow on web (avoids the deprecated shadow*
+// warning), native shadow props on device.
+export const cardShadow = Platform.select({
+  web: { boxShadow: '0 4px 10px rgba(0,0,0,0.08)' },
+  default: {
+    shadowColor: '#000000',
+    shadowOpacity: 0.08,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 2,
+  },
+}) as object
 
 export const ICON_CHOICES = ['🏃', '💧', '🧘', '📖', '😴', '🥗', '🏋️', '🚶', '✍️', '🧠', '🦷', '☀️']
 export const CATEGORIES = ['Fitness', 'Health', 'Mental', 'Learning', 'General']

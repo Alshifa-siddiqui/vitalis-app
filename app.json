@@ -1,20 +1,23 @@
 {
   "expo": {
-    "name": "vitalis-app",
+    "name": "Vitalis",
     "slug": "vitalis-app",
     "scheme": "vitalis",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
+    "userInterfaceStyle": "automatic",
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.shifa.vitalis",
+      "buildNumber": "1"
     },
     "android": {
+      "package": "com.shifa.vitalis",
+      "versionCode": 1,
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
+        "backgroundColor": "#1B4332",
         "foregroundImage": "./assets/android-icon-foreground.png",
-        "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false
@@ -24,7 +27,16 @@
     },
     "plugins": [
       "expo-font",
-      "expo-splash-screen",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash-icon.png",
+          "imageWidth": 180,
+          "resizeMode": "contain",
+          "backgroundColor": "#1B4332",
+          "dark": { "backgroundColor": "#0D1F17" }
+        }
+      ],
       "expo-secure-store",
       "expo-web-browser"
     ]
