@@ -3,6 +3,7 @@ import Svg, { Circle } from 'react-native-svg'
 import { cardShadow, FONT, type Palette } from './theme'
 import { useColors } from './useColors'
 import { useNav } from './nav'
+import { tapFeedback, successFeedback } from './haptics'
 import { computeStats, isDoneToday } from './streaks'
 import type { Habit } from './store'
 
@@ -30,6 +31,7 @@ export function Chip({ label, active, onPress }: { label: string; active: boolea
   const s = makeStyles(C)
   return (
     <Pressable onPress={onPress}
+      accessibilityRole="button" accessibilityLabel={label} accessibilityState={{ selected: active }}
       style={[s.chip, active ? { backgroundColor: C.primary } : { backgroundColor: C.card, borderWidth: 1, borderColor: C.muted + '33' }]}>
       <Text style={{ fontSize: 13, fontFamily: FONT.bold, color: active ? C.white : C.muted }}>{label}</Text>
     </Pressable>
@@ -43,6 +45,7 @@ export function PrimaryButton({ label, onPress, variant = 'solid' }: { label: st
   const fg = variant === 'ghost' ? C.primary : C.white
   return (
     <Pressable onPress={onPress}
+      accessibilityRole="button" accessibilityLabel={label}
       style={[s.btn, { backgroundColor: bg }, variant === 'ghost' && { borderWidth: 1.5, borderColor: C.primary }]}>
       <Text style={{ color: fg, fontFamily: FONT.bold, fontSize: 15 }}>{label}</Text>
     </Pressable>
@@ -78,15 +81,25 @@ export function HabitRow({ habit, onToggle, onLongPress }: { habit: Habit; onTog
   const { openDetail } = useNav()
   const stats = computeStats(habit.history, habit.frequency)
   const done = isDoneToday(habit.history)
+  const check = () => {
+    if (done) tapFeedback()
+    else successFeedback()
+    onToggle(habit.id)
+  }
   return (
-    <Pressable onPress={() => openDetail(habit.id)} onLongPress={() => onLongPress?.(habit)} style={s.habit}>
+    <Pressable onPress={() => openDetail(habit.id)} onLongPress={() => onLongPress?.(habit)} style={s.habit}
+      accessibilityRole="button"
+      accessibilityLabel={`${habit.name}, ${habit.category}, ${habit.frequency}${stats.currentStreak > 0 ? `, ${stats.currentStreak} day streak` : ''}`}
+      accessibilityHint="Opens habit details">
       <View style={s.habitIcon}><Text style={{ fontSize: 20 }}>{habit.icon}</Text></View>
       <View style={{ flex: 1, minWidth: 0 }}>
         <Text style={[s.habitName, done && { color: C.muted, textDecorationLine: 'line-through' }]} numberOfLines={1}>{habit.name}</Text>
         <Text style={s.habitMeta} numberOfLines={1}>{habit.category} · {habit.frequency}</Text>
       </View>
       {stats.currentStreak > 0 && <Text style={s.streak}>🔥 {stats.currentStreak}</Text>}
-      <Pressable onPress={() => onToggle(habit.id)} hitSlop={8}
+      <Pressable onPress={check} hitSlop={8}
+        accessibilityRole="checkbox" accessibilityState={{ checked: done }}
+        accessibilityLabel={`Check in ${habit.name}`}
         style={[s.check, done ? { backgroundColor: C.success, borderColor: C.success } : { borderColor: C.mint }]}>
         {done && <Text style={{ color: C.white, fontSize: 14, fontWeight: '900' }}>✓</Text>}
       </Pressable>

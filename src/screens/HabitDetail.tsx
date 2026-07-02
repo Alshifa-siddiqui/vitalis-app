@@ -4,7 +4,8 @@ import { useColors } from '../useColors'
 import { Heatmap } from '../Heatmap'
 import { PrimaryButton } from '../ui'
 import { useStore } from '../store'
-import { computeStats, isDoneToday, todayISO } from '../streaks'
+import { tapFeedback, successFeedback } from '../haptics'
+import { computeStats, isDoneToday } from '../streaks'
 
 function Stat({ value, label, C }: { value: string | number; label: string; C: Palette }) {
   return (
@@ -27,6 +28,11 @@ export default function HabitDetail({ id, onClose }: { id: string; onClose: () =
 
   const stats = computeStats(habit.history, habit.frequency)
   const done = isDoneToday(habit.history)
+  const checkIn = () => {
+    if (done) tapFeedback()
+    else successFeedback()
+    toggleToday(habit.id)
+  }
   const last7 = Array.from({ length: 7 }, (_, i) => {
     const d = new Date(); d.setDate(d.getDate() - i)
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
@@ -58,7 +64,7 @@ export default function HabitDetail({ id, onClose }: { id: string; onClose: () =
         </View>
 
         <View style={{ height: 18 }} />
-        <PrimaryButton label={done ? 'Undo today’s check-in' : 'Check in today'} onPress={() => toggleToday(habit.id)} variant={done ? 'ghost' : 'solid'} />
+        <PrimaryButton label={done ? 'Undo today’s check-in' : 'Check in today'} onPress={checkIn} variant={done ? 'ghost' : 'solid'} />
         <View style={{ height: 10 }} />
         <PrimaryButton label={habit.archived ? 'Unarchive' : 'Archive'} onPress={() => { toggleArchive(habit.id); onClose() }} variant="ghost" />
         <View style={{ height: 10 }} />

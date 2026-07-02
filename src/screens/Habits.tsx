@@ -68,7 +68,7 @@ export default function Habits() {
         {shown.length > 0 && <Text style={{ color: C.muted, fontSize: 12, textAlign: 'center', marginTop: 16 }}>Tip: tap for details · tap ○ to check in · long-press to edit</Text>}
       </ScrollView>
 
-      <Pressable style={s.fab} onPress={openAdd}>
+      <Pressable style={s.fab} onPress={openAdd} accessibilityRole="button" accessibilityLabel="Add habit">
         <Text style={{ color: C.white, fontSize: 30, marginTop: -2 }}>+</Text>
       </Pressable>
 

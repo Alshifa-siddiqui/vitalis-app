@@ -75,12 +75,13 @@ type State = {
   setNotificationsEnabled: (v: boolean) => void
   clearAll: () => void
   resetAll: () => void
+  seedDemo: () => void
 }
 
 export const useStore = create<State>()(
   persist(
     (set) => ({
-      habits: SEED,
+      habits: [],
       dark: false,
       profileName: '',
       health: EMPTY_HEALTH,
@@ -117,6 +118,12 @@ export const useStore = create<State>()(
             return { ...x, history: has ? x.history.filter((d) => d !== t) : [...x.history, t].sort() }
           }),
         })),
+      seedDemo: () =>
+        set((s) => {
+          const existing = new Set(s.habits.map((h) => h.name.toLowerCase()))
+          const extra = SEED.filter((h) => !existing.has(h.name.toLowerCase()))
+          return { habits: [...s.habits, ...extra] }
+        }),
       resetAll: () => set({ habits: SEED }),
     }),
     { name: 'vitalis-habits-v1', storage: createJSONStorage(() => AsyncStorage) },

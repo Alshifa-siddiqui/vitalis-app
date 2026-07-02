@@ -66,7 +66,8 @@ function MainShell() {
             {TABS.map((t) => {
               const on = tab === t.key
               return (
-                <Pressable key={t.key} style={s.navItem} onPress={() => setTab(t.key)}>
+                <Pressable key={t.key} style={s.navItem} onPress={() => setTab(t.key)}
+                  accessibilityRole="tab" accessibilityLabel={t.label} accessibilityState={{ selected: on }}>
                   <Text style={{ fontSize: 18, color: on ? C.primary : C.muted }}>{t.icon}</Text>
                   <Text style={{ fontSize: 10, fontFamily: FONT.semibold, color: on ? C.primary : C.muted }}>{t.label}</Text>
                 </Pressable>

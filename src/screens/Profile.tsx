@@ -12,7 +12,7 @@ type Sub = 'main' | 'edit' | 'health' | 'notifications' | 'privacy' | 'changepw'
 function Toggle({ on, onPress }: { on: boolean; onPress: () => void }) {
   const C = useColors()
   return (
-    <Pressable onPress={onPress}
+    <Pressable onPress={onPress} accessibilityRole="switch" accessibilityState={{ checked: on }}
       style={{ width: 46, height: 26, borderRadius: 13, padding: 3, justifyContent: 'center',
         backgroundColor: on ? C.primary : C.muted + '55', alignItems: on ? 'flex-end' : 'flex-start' }}>
       <View style={{ width: 20, height: 20, borderRadius: 10, backgroundColor: '#FFFFFF' }} />
@@ -56,6 +56,7 @@ export default function Profile() {
   const notificationsEnabled = useStore((st) => st.notificationsEnabled)
   const setNotificationsEnabled = useStore((st) => st.setNotificationsEnabled)
   const clearAll = useStore((st) => st.clearAll)
+  const seedDemo = useStore((st) => st.seedDemo)
   const { user, signOut, configured } = useAuth()
 
   if (sub === 'edit') return <EditProfile onBack={() => setSub('main')} />
@@ -77,7 +78,7 @@ export default function Profile() {
       </ScrollView>
     )
   }
-  if (sub === 'privacy') return <PrivacyScreen onBack={() => setSub('main')} onClear={clearAll} configured={configured} />
+  if (sub === 'privacy') return <PrivacyScreen onBack={() => setSub('main')} onClear={clearAll} onSeed={seedDemo} configured={configured} />
   if (sub === 'changepw') return <ChangePassword onBack={() => setSub('main')} />
   if (sub === 'changeemail') return <ChangeEmail onBack={() => setSub('main')} />
 
@@ -186,15 +187,17 @@ function HealthScreen({ onBack }: { onBack: () => void }) {
   )
 }
 
-function PrivacyScreen({ onBack, onClear, configured }: { onBack: () => void; onClear: () => void; configured: boolean }) {
+function PrivacyScreen({ onBack, onClear, onSeed, configured }: { onBack: () => void; onClear: () => void; onSeed: () => void; configured: boolean }) {
   const C = useColors()
   const s = makeStyles(C)
   const [confirm, setConfirm] = useState(false)
   const [done, setDone] = useState(false)
+  const [seeded, setSeeded] = useState(false)
   const handle = () => {
     if (!confirm) { setConfirm(true); return }
     onClear(); setConfirm(false); setDone(true)
   }
+  const seed = () => { onSeed(); setSeeded(true) }
   return (
     <ScrollView contentContainerStyle={{ padding: 20 }} showsVerticalScrollIndicator={false}>
       <SubHeader title="Privacy & Data" onBack={onBack} />
@@ -205,7 +208,16 @@ function PrivacyScreen({ onBack, onClear, configured }: { onBack: () => void; on
             : 'Running in demo mode; data stays on this device.'}
         </Text>
       </View>
-      <View style={{ height: 16 }} />
+
+      <Text style={s.section}>Sample data</Text>
+      {seeded
+        ? <Text style={{ color: C.success, fontFamily: FONT.semibold, fontSize: 14 }}>✓ Sample habits added.</Text>
+        : <PrimaryButton label="Load sample habits" onPress={seed} variant="ghost" />}
+      <Text style={{ color: C.muted, fontSize: 12, marginTop: 10, fontFamily: FONT.medium }}>
+        Adds a few example habits with history so you can explore the app. Won't duplicate ones you already have.
+      </Text>
+
+      <Text style={s.section}>Danger zone</Text>
       {done
         ? <Text style={{ color: C.success, fontFamily: FONT.semibold, fontSize: 14 }}>✓ All habit data deleted.</Text>
         : <PrimaryButton label={confirm ? 'Tap again to permanently delete' : 'Delete all habit data'} onPress={handle} variant="danger" />}
