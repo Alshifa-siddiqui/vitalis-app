@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Privacy Policy — Vitalis</title>
+<style>
+  :root { --forest:#1B4332; --primary:#2D6A4F; --mint:#52B788; --light:#D8F3DC; --ink:#1B2B22; --muted:#5B6B62; --canvas:#F5FBF7; }
+  * { box-sizing: border-box; }
+  body { margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; color:var(--ink); background:var(--canvas); line-height:1.65; }
+  .wrap { max-width:720px; margin:0 auto; padding:40px 24px 64px; }
+  a.back { color:var(--primary); text-decoration:none; font-size:14px; font-weight:600; }
+  h1 { font-size:30px; color:var(--forest); margin:18px 0 2px; }
+  .updated { color:var(--muted); font-size:14px; margin:0 0 24px; }
+  h2 { color:var(--primary); font-size:20px; margin:28px 0 8px; }
+  p, li { color:#33443b; }
+  ul { padding-left:20px; }
+  strong { color:var(--ink); }
+  a { color:var(--primary); }
+  hr { border:none; border-top:1px solid #e3efe8; margin:32px 0; }
+  .note { background:#fff; border:1px solid #e3efe8; border-radius:14px; padding:14px 16px; color:var(--muted); font-size:14px; }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <a class="back" href="index.html">← Vitalis</a>
+    <h1>Privacy Policy</h1>
+    <p class="updated">Last updated: 30 June 2026</p>
+
+    <p>Vitalis ("we", "us", the "app") is a personal wellness and habit-tracking app. This policy explains what we collect, why, and your rights. We designed Vitalis to collect as little as possible.</p>
+
+    <h2>Who we are</h2>
+    <p>Vitalis is developed by Alshifa Siddiqui. Contact: <strong>siddiqui21shifa@gmail.com</strong>.</p>
+
+    <h2>What we collect</h2>
+    <ul>
+      <li><strong>Account data</strong> — your email address and an encrypted password (handled by our authentication provider, Supabase). If you sign in with Google, we receive your email and basic profile from Google.</li>
+      <li><strong>App data you create</strong> — your habits, check-in history, streaks, display name, and any optional health-profile values you enter (age, weight, height, goals, notes). Health-profile fields are <strong>optional</strong> and stored only if you choose to enter them.</li>
+      <li><strong>AI feature input</strong> — when you tap "Get AI Insight," a summary of your habits and goals is sent to our secure server function, which forwards it to Anthropic's Claude API to generate wellness text. We do <strong>not</strong> send your name, email, or raw health-report files.</li>
+      <li><strong>Technical data</strong> — standard request metadata (e.g. timestamps) needed to operate the service.</li>
+    </ul>
+    <p>We do <strong>not</strong> sell your data, show ads, or use third-party advertising trackers.</p>
+
+    <h2>How we use it</h2>
+    <ul>
+      <li>To provide the app: authenticate you, store and sync your habits, and generate insights you request.</li>
+      <li>To keep the service secure and working.</li>
+    </ul>
+
+    <h2>Where it's stored &amp; who can see it</h2>
+    <ul>
+      <li>Your data is stored in our Supabase (PostgreSQL) database, protected by <strong>Row-Level Security</strong> — meaning only your authenticated account can read or write your rows.</li>
+      <li>Authentication tokens are stored encrypted on your device (iOS Keychain / Android Keystore).</li>
+      <li>Sub-processors: <strong>Supabase</strong> (database, auth, hosting) and <strong>Anthropic</strong> (AI insight generation). Each processes data only to provide their service.</li>
+    </ul>
+
+    <h2>Health data</h2>
+    <p>Vitalis provides <strong>general wellness information only — not medical advice</strong>, and is not a medical device. Health-profile values you enter are treated as sensitive and protected the same way as the rest of your data.</p>
+
+    <h2>Your rights</h2>
+    <ul>
+      <li><strong>Access / export</strong> — you can export your data from within the app (Profile → Privacy &amp; data).</li>
+      <li><strong>Delete</strong> — you can delete all your habit data in-app, and request full account deletion (Profile → Privacy &amp; data, or email us). We will delete your account and associated data.</li>
+      <li><strong>Withdraw consent</strong> — stop using the app and delete your account at any time.</li>
+    </ul>
+    <p>Depending on your region (e.g. EU/UK GDPR, California CCPA), you may have additional rights to access, correct, or erase your data; contact us to exercise them.</p>
+
+    <h2>Data retention</h2>
+    <p>We keep your data while your account is active. When you delete your account, we remove your personal data from our active systems.</p>
+
+    <h2>Children</h2>
+    <p>Vitalis is not directed to children under 13 (or the minimum age in your country). We do not knowingly collect data from children.</p>
+
+    <h2>Changes</h2>
+    <p>We may update this policy; the "Last updated" date will change. Material changes will be surfaced in the app or by email.</p>
+
+    <h2>Contact</h2>
+    <p>Questions or requests: <strong>siddiqui21shifa@gmail.com</strong>.</p>
+
+    <hr>
+    <p class="note">Vitalis offers general wellness information only and is not a substitute for professional medical advice.</p>
+  </div>
+</body>
+</html>
