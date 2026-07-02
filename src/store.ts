@@ -51,6 +51,9 @@ export type HealthProfile = {
   sleepGoal: string; waterGoal: string; conditions: string
 }
 
+export type Insight = { text: string; at: string } // at = ISO timestamp
+const MAX_INSIGHTS = 10
+
 const EMPTY_HEALTH: HealthProfile = {
   age: '', weightKg: '', heightCm: '', sleepGoal: '8', waterGoal: '8', conditions: '',
 }
@@ -63,6 +66,9 @@ type State = {
   notificationsEnabled: boolean
   onboarded: boolean
   goals: string[]
+  insights: Insight[]
+  addInsight: (text: string) => void
+  clearInsights: () => void
   completeOnboarding: (goals: string[]) => void
   addHabit: (h: NewHabit) => void
   updateHabit: (id: string, patch: Partial<Habit>) => void
@@ -88,6 +94,10 @@ export const useStore = create<State>()(
       notificationsEnabled: true,
       onboarded: false,
       goals: [],
+      insights: [],
+      addInsight: (text) =>
+        set((s) => ({ insights: [{ text, at: new Date().toISOString() }, ...s.insights].slice(0, MAX_INSIGHTS) })),
+      clearInsights: () => set({ insights: [] }),
       completeOnboarding: (goals) =>
         set((s) => {
           const existing = new Set(s.habits.map((h) => h.name.toLowerCase()))

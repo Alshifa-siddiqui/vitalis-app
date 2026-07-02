@@ -3,8 +3,10 @@ import { computeStats } from './streaks'
 import { useStore, type Habit } from './store'
 
 // Calls the secure ai-insight Edge Function (Claude key stays server-side).
+// `fast` requests a lighter, cheaper model (Haiku) instead of the default Opus.
 export async function getAIInsight(
   habits: Habit[],
+  opts: { fast?: boolean } = {},
 ): Promise<{ insight?: string; error?: string }> {
   if (!isConfigured) return { error: 'Connect Supabase to enable AI insights.' }
   if (!habits.length) return { error: 'Add a habit first.' }
@@ -23,7 +25,7 @@ export async function getAIInsight(
 
   const goals = useStore.getState().goals
   const { data, error } = await supabase.functions.invoke('ai-insight', {
-    body: { habits: payload, goals },
+    body: { habits: payload, goals, fast: !!opts.fast },
   })
   if (error) return { error: error.message }
   if (data?.error) return { error: data.error }

@@ -6,6 +6,7 @@ import { Header, PrimaryButton } from '../ui'
 import { useStore } from '../store'
 import { useAuth } from '../auth'
 import { computeStats } from '../streaks'
+import { exportData } from '../export'
 
 type Sub = 'main' | 'edit' | 'health' | 'notifications' | 'privacy' | 'changepw' | 'changeemail'
 
@@ -208,6 +209,12 @@ function PrivacyScreen({ onBack, onClear, onSeed, configured }: { onBack: () => 
             : 'Running in demo mode; data stays on this device.'}
         </Text>
       </View>
+
+      <Text style={s.section}>Export</Text>
+      <PrimaryButton label="Export my data (JSON)" onPress={() => exportData()} variant="ghost" />
+      <Text style={{ color: C.muted, fontSize: 12, marginTop: 10, fontFamily: FONT.medium }}>
+        Save or share a full copy of your habits, check-ins, goals, and profile as a JSON file.
+      </Text>
 
       <Text style={s.section}>Sample data</Text>
       {seeded

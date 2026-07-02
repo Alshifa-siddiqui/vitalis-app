@@ -69,3 +69,15 @@ create policy "profiles_insert_own" on public.profiles
   for insert with check (auth.uid() = id);
 create policy "profiles_update_own" on public.profiles
   for update using (auth.uid() = id) with check (auth.uid() = id);
+
+-- AI usage counter: enforces a per-user daily quota on the ai-insight function.
+-- Only the Edge Function (service role) touches this; no client policies needed,
+-- and RLS-enabled-with-no-policy keeps it inaccessible to end users.
+create table if not exists public.ai_usage (
+  user_id  uuid not null references auth.users(id) on delete cascade,
+  day      date not null,
+  count    integer not null default 0,
+  primary key (user_id, day)
+);
+
+alter table public.ai_usage enable row level security;

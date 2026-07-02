@@ -5,7 +5,7 @@ const get = () => useStore.getState()
 
 beforeEach(() => {
   get().resetAll() // back to the seed habits
-  useStore.setState({ onboarded: false, goals: [], profileName: '' })
+  useStore.setState({ onboarded: false, goals: [], profileName: '', insights: [] })
 })
 
 describe('habit CRUD', () => {
@@ -52,6 +52,29 @@ describe('toggleToday', () => {
     const id = get().habits[0].id
     get().toggleToday(id)
     expect(get().habits[0].history).toContain(todayISO())
+  })
+})
+
+describe('seedDemo', () => {
+  it('adds sample habits without duplicating existing ones', () => {
+    get().clearAll()
+    get().addHabit({ name: 'Morning Run', icon: '🏃', frequency: 'daily', category: 'Fitness' })
+    get().seedDemo()
+    const names = get().habits.map((h) => h.name)
+    expect(names.filter((n) => n === 'Morning Run').length).toBe(1) // not duplicated
+    expect(names).toContain('Meditation') // a fresh sample was added
+  })
+})
+
+describe('insights', () => {
+  it('prepends new insights and caps the history at 10', () => {
+    for (let i = 0; i < 12; i++) get().addInsight(`insight ${i}`)
+    const insights = get().insights
+    expect(insights.length).toBe(10)
+    expect(insights[0].text).toBe('insight 11') // newest first
+    expect(insights[0].at).toBeTruthy()
+    get().clearInsights()
+    expect(get().insights).toEqual([])
   })
 })
 
