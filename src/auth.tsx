@@ -19,7 +19,7 @@ type AuthValue = {
   recovering: boolean
   signUp: (email: string, password: string) => Promise<{ error?: string; needsConfirm?: boolean }>
   signIn: (email: string, password: string) => Promise<Result>
-  signInWithProvider: (provider: 'google' | 'apple') => Promise<Result>
+  signInWithProvider: (provider: 'google') => Promise<Result>
   resetPasswordForEmail: (email: string) => Promise<Result>
   resendConfirmation: (email: string) => Promise<Result>
   updatePassword: (password: string) => Promise<Result>

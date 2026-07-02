@@ -1,5 +1,4 @@
 -- Vitalis — database schema + Row-Level Security
--- Run this in your Supabase project: SQL Editor → paste → Run.
 -- Every user can only read/write their OWN habits (enforced by RLS).
 
 create table if not exists public.habits (

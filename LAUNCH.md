@@ -95,6 +95,10 @@ eas submit --platform android --latest
 Notes:
 - Bundle id / package: `com.shifa.vitalis` (already set in `app.json`).
 - Native **Google sign-in** needs a real build (it does NOT work in Expo Go).
+- **Sign in with Apple is intentionally NOT included.** Apple's guideline 4.8
+  normally requires it when you offer Google sign-in — but that rule is waived
+  because Vitalis also offers first-party email + password sign-in. So the app
+  is still App Store–eligible with Google + email only.
 - Fill in the store listings from `STORE_LISTING.md` and upload screenshots
   (capture them on-device — see the screenshot plan in that file).
 

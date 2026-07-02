@@ -52,9 +52,9 @@ export default function Auth({ onDemo }: { onDemo: () => void }) {
     else setNotice('Confirmation email resent.')
   }
 
-  const social = async (p: 'google' | 'apple') => {
+  const social = async () => {
     reset()
-    const res = await signInWithProvider(p)
+    const res = await signInWithProvider('google')
     if (res.error) setError(res.error)
   }
 
@@ -107,11 +107,8 @@ export default function Auth({ onDemo }: { onDemo: () => void }) {
         {mode !== 'forgot' && (
           <>
             <View style={s.divider}><View style={s.line} /><Text style={s.or}>or</Text><View style={s.line} /></View>
-            <Pressable style={s.social} onPress={() => social('google')}>
-              <Text style={s.socialText}>continue with Google</Text>
-            </Pressable>
-            <Pressable style={[s.social, { backgroundColor: C.ink, borderColor: C.ink }]} onPress={() => social('apple')}>
-              <Text style={[s.socialText, { color: C.card }]}> Continue with Apple</Text>
+            <Pressable style={s.social} onPress={social} accessibilityRole="button" accessibilityLabel="Continue with Google">
+              <Text style={s.socialText}>Continue with Google</Text>
             </Pressable>
           </>
         )}
