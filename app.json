@@ -34,11 +34,18 @@
           "imageWidth": 180,
           "resizeMode": "contain",
           "backgroundColor": "#1B4332",
-          "dark": { "backgroundColor": "#0D1F17" }
+          "dark": {
+            "backgroundColor": "#0D1F17"
+          }
         }
       ],
       "expo-secure-store",
       "expo-web-browser"
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "ae934843-ea8a-4c32-b861-acd891f70a64"
+      }
+    }
   }
 }
