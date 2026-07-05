@@ -54,6 +54,10 @@ export type HealthProfile = {
 export type Insight = { text: string; at: string } // at = ISO timestamp
 const MAX_INSIGHTS = 10
 
+// Tracks AI insights used in the current month, for the free-tier allowance.
+export type AiUsage = { month: string; count: number }
+const monthKey = () => new Date().toISOString().slice(0, 7) // "YYYY-MM"
+
 const EMPTY_HEALTH: HealthProfile = {
   age: '', weightKg: '', heightCm: '', sleepGoal: '8', waterGoal: '8', conditions: '',
 }
@@ -69,6 +73,13 @@ type State = {
   insights: Insight[]
   addInsight: (text: string) => void
   clearInsights: () => void
+  plus: boolean
+  setPlus: (v: boolean) => void
+  aiUsage: AiUsage
+  recordAiUse: () => void
+  paywallOpen: boolean
+  openPaywall: () => void
+  closePaywall: () => void
   completeOnboarding: (goals: string[]) => void
   addHabit: (h: NewHabit) => void
   updateHabit: (id: string, patch: Partial<Habit>) => void
@@ -98,6 +109,18 @@ export const useStore = create<State>()(
       addInsight: (text) =>
         set((s) => ({ insights: [{ text, at: new Date().toISOString() }, ...s.insights].slice(0, MAX_INSIGHTS) })),
       clearInsights: () => set({ insights: [] }),
+      plus: false,
+      setPlus: (v) => set({ plus: v }),
+      aiUsage: { month: monthKey(), count: 0 },
+      recordAiUse: () =>
+        set((s) => {
+          const m = monthKey()
+          const count = s.aiUsage.month === m ? s.aiUsage.count + 1 : 1
+          return { aiUsage: { month: m, count } }
+        }),
+      paywallOpen: false,
+      openPaywall: () => set({ paywallOpen: true }),
+      closePaywall: () => set({ paywallOpen: false }),
       completeOnboarding: (goals) =>
         set((s) => {
           const existing = new Set(s.habits.map((h) => h.name.toLowerCase()))

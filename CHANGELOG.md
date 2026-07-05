@@ -4,11 +4,14 @@ All notable changes to Vitalis are documented here. Versions follow
 [Semantic Versioning](https://semver.org): MAJOR.MINOR.PATCH.
 
 ## [Unreleased]
+- Vitalis Plus: premium scaffolding with a paywall and entitlement flag
+  (`plus`). Free tier limited to 5 habits and 3 AI insights/month; Plus unlocks
+  unlimited. Billing is simulated until RevenueCat is wired for the store release.
 - Crash & error monitoring (Sentry) with privacy-respecting event breadcrumbs.
 - In-app Help & FAQ + "Report a bug" / "Contact support".
 - Logging/analytics layer (`src/log.ts`).
 - Architecture, changelog, and roadmap documentation.
-- Tests for data export and the logging layer.
+- Tests for data export, logging, and premium gating.
 
 ## [1.0.0] — 2026-07-02
 First complete release candidate.

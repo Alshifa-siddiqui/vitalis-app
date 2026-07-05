@@ -5,6 +5,7 @@ import { useColors } from '../useColors'
 import { Ring, Header, PrimaryButton } from '../ui'
 import { useStore } from '../store'
 import { getAIInsight } from '../ai'
+import { aiInsightsLeft, FREE_AI_PER_MONTH } from '../premium'
 
 function timeAgo(iso: string): string {
   const mins = Math.floor((Date.now() - new Date(iso).getTime()) / 60000)
@@ -32,17 +33,24 @@ export default function Health() {
   const insights = useStore((s) => s.insights)
   const addInsight = useStore((s) => s.addInsight)
   const clearInsights = useStore((s) => s.clearInsights)
+  const plus = useStore((s) => s.plus)
+  const aiUsage = useStore((s) => s.aiUsage)
+  const recordAiUse = useStore((s) => s.recordAiUse)
+  const openPaywall = useStore((s) => s.openPaywall)
 
   const [aiError, setAiError] = useState('')
   const [loading, setLoading] = useState(false)
   const [fast, setFast] = useState(false)
 
+  const left = aiInsightsLeft(plus, aiUsage)
+
   const runInsight = async () => {
+    if (left <= 0) { openPaywall(); return }
     setLoading(true); setAiError('')
     const res = await getAIInsight(habits, { fast })
     setLoading(false)
     if (res.error) setAiError(res.error)
-    else if (res.insight) addInsight(res.insight)
+    else if (res.insight) { addInsight(res.insight); recordAiUse() }
   }
 
   const latest = insights[0]
@@ -76,10 +84,13 @@ export default function Health() {
             </View>
             <Text style={{ color: C.mid, fontSize: 13, fontFamily: FONT.medium }}>⚡ Faster, lighter model</Text>
           </Pressable>
+          <Text style={{ color: C.muted, fontSize: 12, fontFamily: FONT.medium, marginTop: 10 }}>
+            {plus ? '⭐ Plus · unlimited insights' : `${left} of ${FREE_AI_PER_MONTH} free insights left this month`}
+          </Text>
           <View style={{ height: 12 }} />
           {loading
             ? <ActivityIndicator color={C.primary} />
-            : <PrimaryButton label={latest ? '✨ Get a new insight' : '✨ Get AI Insight'} onPress={runInsight} />}
+            : <PrimaryButton label={left <= 0 ? '⭐ Upgrade for unlimited insights' : latest ? '✨ Get a new insight' : '✨ Get AI Insight'} onPress={runInsight} />}
           {aiError ? <Text style={{ color: C.error, fontFamily: FONT.medium, fontSize: 13, marginTop: 10 }}>{aiError}</Text> : null}
           {latest ? (
             <View style={{ marginTop: 12 }}>

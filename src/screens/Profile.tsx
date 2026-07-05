@@ -59,6 +59,9 @@ export default function Profile() {
   const setNotificationsEnabled = useStore((st) => st.setNotificationsEnabled)
   const clearAll = useStore((st) => st.clearAll)
   const seedDemo = useStore((st) => st.seedDemo)
+  const plus = useStore((st) => st.plus)
+  const setPlus = useStore((st) => st.setPlus)
+  const openPaywall = useStore((st) => st.openPaywall)
   const { user, signOut, configured } = useAuth()
 
   if (sub === 'edit') return <EditProfile onBack={() => setSub('main')} />
@@ -115,6 +118,23 @@ export default function Profile() {
           <View style={s.stat}><Text style={s.statV}>{since ?? '—'}</Text><Text style={s.statL}>Since</Text></View>
         </View>
       </View>
+
+      {plus ? (
+        <View style={[s.plusCard, { borderColor: C.secondary }]}>
+          <Text style={s.plusTitle}>⭐ Vitalis Plus</Text>
+          <Text style={s.plusBody}>You’re a Plus member — unlimited habits & AI insights. Thank you!</Text>
+          <Pressable onPress={() => setPlus(false)} hitSlop={6}>
+            <Text style={{ color: C.muted, fontSize: 12, marginTop: 10, fontFamily: FONT.medium }}>Switch back to Free (testing)</Text>
+          </Pressable>
+        </View>
+      ) : (
+        <Pressable style={[s.plusCard, { borderColor: C.secondary }]} onPress={openPaywall}
+          accessibilityRole="button" accessibilityLabel="Upgrade to Vitalis Plus">
+          <Text style={s.plusTitle}>⭐ Upgrade to Vitalis Plus</Text>
+          <Text style={s.plusBody}>Unlimited habits, unlimited AI insights, advanced trends & more.</Text>
+          <Text style={{ color: C.primary, fontSize: 14, fontFamily: FONT.bold, marginTop: 10 }}>See what’s included →</Text>
+        </Pressable>
+      )}
 
       <Text style={s.section}>Appearance</Text>
       <Pressable style={[s.menu, s.menuRow]} onPress={toggleDark}>
@@ -347,6 +367,9 @@ function HelpScreen({ onBack }: { onBack: () => void }) {
 const makeStyles = (C: Palette) => StyleSheet.create({
   card: { backgroundColor: C.card, borderRadius: 24, padding: 24, alignItems: 'center', ...cardShadow },
   card2: { backgroundColor: C.card, borderRadius: 20, padding: 18, ...cardShadow },
+  plusCard: { backgroundColor: C.lightmint, borderWidth: 1, borderRadius: 20, padding: 18, marginTop: 20 },
+  plusTitle: { fontFamily: FONT.display, fontSize: 19, color: C.forest },
+  plusBody: { color: C.mid, fontSize: 13.5, fontFamily: FONT.medium, marginTop: 6, lineHeight: 19 },
   avatar: { width: 72, height: 72, borderRadius: 36, backgroundColor: C.primary, alignItems: 'center', justifyContent: 'center' },
   name: { fontFamily: FONT.display, fontSize: 23, color: C.forest, marginTop: 12, textTransform: 'capitalize' },
   statsRow: { flexDirection: 'row', alignItems: 'center', marginTop: 18 },

@@ -97,12 +97,22 @@ SQL, logs, and auth settings are all there. Building a custom admin dashboard fo
 a single-maintainer app would duplicate that for no gain, so it's intentionally
 not built.
 
-## Payments
+## Payments (Vitalis Plus)
 
-Vitalis is **free with no paid features**, so there is no payment system by
-design. The architecture is payment-ready if needed later: subscriptions would
-slot in via RevenueCat + a `subscriptions` table gated by RLS, without touching
-the core data model.
+Premium is **scaffolded and gated**, with billing intentionally deferred:
+
+- A single entitlement flag `plus` (in the store) drives all gating via
+  `src/premium.ts` (`canAddHabit`, `aiInsightsLeft`). Free tier = 5 habits + 3 AI
+  insights/month; Plus = unlimited.
+- The paywall (`src/screens/Paywall.tsx`) is a store-triggered modal reachable
+  from anywhere via `openPaywall()`.
+- **Billing is simulated today** (the upgrade button flips `plus`). To go live,
+  drop in **RevenueCat** (`react-native-purchases`): configure products in Play
+  Console, then set `plus` from the RevenueCat entitlement on launch/purchase.
+  Nothing else in the app changes — gating already reads a single flag.
+
+This keeps the app fully premium-ready without shipping billing before the store
+account and pricing are finalized.
 
 ## Versioning
 

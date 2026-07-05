@@ -14,6 +14,7 @@ import { Lotus } from './src/Lotus'
 import { ErrorBoundary } from './src/ErrorBoundary'
 import { NavProvider } from './src/nav'
 import HabitDetail from './src/screens/HabitDetail'
+import Paywall from './src/screens/Paywall'
 import Auth from './src/screens/Auth'
 import SetNewPassword from './src/screens/SetNewPassword'
 import Onboarding from './src/screens/Onboarding'
@@ -64,6 +65,8 @@ function MainShell() {
   const active = TABS.find((t) => t.key === tab)!
   const habits = useStore((s) => s.habits)
   const notificationsEnabled = useStore((s) => s.notificationsEnabled)
+  const paywallOpen = useStore((s) => s.paywallOpen)
+  const closePaywall = useStore((s) => s.closePaywall)
   // Reschedule daily reminders when habits change; clear them when disabled.
   useEffect(() => {
     syncReminders(notificationsEnabled ? habits : [])
@@ -88,6 +91,9 @@ function MainShell() {
           </View>
           <Modal visible={!!nav.detailId} animationType="slide" onRequestClose={nav.closeDetail}>
             {nav.detailId ? <HabitDetail id={nav.detailId} onClose={nav.closeDetail} /> : null}
+          </Modal>
+          <Modal visible={paywallOpen} animationType="slide" onRequestClose={closePaywall}>
+            <Paywall />
           </Modal>
         </SafeAreaView>
       )}
