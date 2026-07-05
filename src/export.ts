@@ -1,5 +1,6 @@
 import { Share } from 'react-native'
 import { useStore } from './store'
+import { log } from './log'
 
 // Bundles all local data into a portable JSON snapshot the user can save or
 // send elsewhere. Uses the built-in Share sheet (no extra native deps).
@@ -22,8 +23,10 @@ export async function exportData(): Promise<{ ok: boolean; error?: string }> {
       message: json,
     })
     if (result.action === Share.dismissedAction) return { ok: false }
+    log.event('data_exported', { habitCount: snapshot.habits.length })
     return { ok: true }
   } catch (e) {
+    log.error(e, { where: 'exportData' })
     return { ok: false, error: e instanceof Error ? e.message : 'Export failed.' }
   }
 }

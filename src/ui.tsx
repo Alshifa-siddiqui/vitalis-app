@@ -4,6 +4,7 @@ import { cardShadow, FONT, type Palette } from './theme'
 import { useColors } from './useColors'
 import { useNav } from './nav'
 import { tapFeedback, successFeedback } from './haptics'
+import { log } from './log'
 import { computeStats, isDoneToday } from './streaks'
 import type { Habit } from './store'
 
@@ -83,7 +84,7 @@ export function HabitRow({ habit, onToggle, onLongPress }: { habit: Habit; onTog
   const done = isDoneToday(habit.history)
   const check = () => {
     if (done) tapFeedback()
-    else successFeedback()
+    else { successFeedback(); log.event('habit_checked_in', { category: habit.category }) }
     onToggle(habit.id)
   }
   return (

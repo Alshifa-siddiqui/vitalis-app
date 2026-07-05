@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ScrollView, View, Text, Pressable, TextInput, StyleSheet, ActivityIndicator, KeyboardTypeOptions } from 'react-native'
+import { ScrollView, View, Text, Pressable, TextInput, StyleSheet, ActivityIndicator, KeyboardTypeOptions, Linking, Platform } from 'react-native'
 import { cardShadow, FONT, type Palette } from '../theme'
 import { useColors } from '../useColors'
 import { Header, PrimaryButton } from '../ui'
@@ -7,8 +7,9 @@ import { useStore } from '../store'
 import { useAuth } from '../auth'
 import { computeStats } from '../streaks'
 import { exportData } from '../export'
+import { APP_VERSION } from '../version'
 
-type Sub = 'main' | 'edit' | 'health' | 'notifications' | 'privacy' | 'changepw' | 'changeemail'
+type Sub = 'main' | 'edit' | 'health' | 'notifications' | 'privacy' | 'changepw' | 'changeemail' | 'help'
 
 function Toggle({ on, onPress }: { on: boolean; onPress: () => void }) {
   const C = useColors()
@@ -80,6 +81,7 @@ export default function Profile() {
     )
   }
   if (sub === 'privacy') return <PrivacyScreen onBack={() => setSub('main')} onClear={clearAll} onSeed={seedDemo} configured={configured} />
+  if (sub === 'help') return <HelpScreen onBack={() => setSub('main')} />
   if (sub === 'changepw') return <ChangePassword onBack={() => setSub('main')} />
   if (sub === 'changeemail') return <ChangeEmail onBack={() => setSub('main')} />
 
@@ -94,6 +96,7 @@ export default function Profile() {
     { label: 'Notifications', go: 'notifications' },
     ...(user ? ([{ label: 'Change password', go: 'changepw' }, { label: 'Change email', go: 'changeemail' }] as { label: string; go: Sub }[]) : []),
     { label: 'Privacy & data', go: 'privacy' },
+    { label: 'Help & FAQ', go: 'help' },
   ]
 
   return (
@@ -290,6 +293,53 @@ function ChangeEmail({ onBack }: { onBack: () => void }) {
         <View style={{ height: 16 }} />
         {busy ? <ActivityIndicator color={C.primary} /> : <PrimaryButton label="Update email" onPress={save} />}
       </View>
+    </ScrollView>
+  )
+}
+
+const FAQ: { q: string; a: string }[] = [
+  { q: 'How do streaks work?', a: 'Check in each day a habit is due. Your streak is the run of consecutive on-time check-ins; miss a day and it resets.' },
+  { q: 'Is my data private?', a: 'Yes. Your habits are protected by row-level security — only your account can read them. We never sell data or show ads.' },
+  { q: 'What does the AI coach see?', a: 'Only a summary of your habits and goals — never your name, email, or health notes. It generates general wellness encouragement, not medical advice.' },
+  { q: 'How do I export or delete my data?', a: 'Profile → Privacy & data. You can export everything as JSON or delete all habit data at any time.' },
+  { q: 'Why didn’t my reminder fire?', a: 'Set a reminder time when adding/editing a habit, keep reminders enabled in Notifications, and allow notifications in your phone settings.' },
+]
+
+function HelpScreen({ onBack }: { onBack: () => void }) {
+  const C = useColors()
+  const s = makeStyles(C)
+  const [open, setOpen] = useState<number | null>(null)
+
+  const mail = (subject: string) => {
+    const body = `\n\n---\nApp: Vitalis v${APP_VERSION}\nPlatform: ${Platform.OS} ${Platform.Version}`
+    const url = `mailto:siddiqui21shifa@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
+    Linking.openURL(url).catch(() => {})
+  }
+
+  return (
+    <ScrollView contentContainerStyle={{ padding: 20, paddingBottom: 40 }} showsVerticalScrollIndicator={false}>
+      <SubHeader title="Help & FAQ" onBack={onBack} />
+
+      <View style={s.menu}>
+        {FAQ.map((item, i) => (
+          <Pressable key={item.q} style={s.menuRow} onPress={() => setOpen(open === i ? null : i)}
+            accessibilityRole="button" accessibilityLabel={item.q}>
+            <View style={{ flex: 1, paddingRight: 12 }}>
+              <Text style={{ color: C.ink, fontSize: 15, fontFamily: FONT.semibold }}>{item.q}</Text>
+              {open === i ? <Text style={{ color: C.muted, fontSize: 13, marginTop: 8, lineHeight: 19 }}>{item.a}</Text> : null}
+            </View>
+            <Text style={{ color: C.muted }}>{open === i ? '▲' : '▼'}</Text>
+          </Pressable>
+        ))}
+      </View>
+
+      <Text style={s.section}>Still need help?</Text>
+      <PrimaryButton label="Contact support" onPress={() => mail('Vitalis — Support request')} variant="ghost" />
+      <View style={{ height: 10 }} />
+      <PrimaryButton label="Report a bug" onPress={() => mail('Vitalis — Bug report')} variant="ghost" />
+      <Text style={{ color: C.muted, fontSize: 12, marginTop: 12, fontFamily: FONT.medium, textAlign: 'center' }}>
+        Vitalis v{APP_VERSION} · siddiqui21shifa@gmail.com
+      </Text>
     </ScrollView>
   )
 }

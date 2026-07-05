@@ -1,5 +1,6 @@
 import { supabase, isConfigured } from './supabase'
 import { computeStats } from './streaks'
+import { log } from './log'
 import { useStore, type Habit } from './store'
 
 // Calls the secure ai-insight Edge Function (Claude key stays server-side).
@@ -24,10 +25,11 @@ export async function getAIInsight(
   })
 
   const goals = useStore.getState().goals
+  log.event('ai_insight_requested', { habitCount: habits.length, fast: !!opts.fast })
   const { data, error } = await supabase.functions.invoke('ai-insight', {
     body: { habits: payload, goals, fast: !!opts.fast },
   })
-  if (error) return { error: error.message }
+  if (error) { log.error(error, { where: 'ai-insight' }); return { error: error.message } }
   if (data?.error) return { error: data.error }
   return { insight: data?.insight ?? 'No insight returned.' }
 }

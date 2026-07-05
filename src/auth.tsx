@@ -5,6 +5,7 @@ import { makeRedirectUri } from 'expo-auth-session'
 import * as QueryParams from 'expo-auth-session/build/QueryParams'
 import type { Session, User } from '@supabase/supabase-js'
 import { supabase, isConfigured } from './supabase'
+import { log } from './log'
 
 // Lets the in-app browser dismiss itself after the OAuth redirect (web).
 WebBrowser.maybeCompleteAuthSession()
@@ -86,6 +87,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     },
     signIn: async (email, password) => {
       const { error } = await supabase.auth.signInWithPassword({ email, password })
+      if (!error) log.event('signed_in', { method: 'password' })
       return error ? { error: error.message } : {}
     },
     signInWithProvider: async (provider) => {
@@ -113,6 +115,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return sessErr ? { error: sessErr.message } : {}
     },
     signOut: async () => {
+      log.event('signed_out')
       await supabase.auth.signOut()
       setSession(null)
     },
