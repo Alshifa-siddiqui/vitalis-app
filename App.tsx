@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { SafeAreaView, View, Text, Pressable, StyleSheet, StatusBar, ActivityIndicator, Modal } from 'react-native'
+import * as Sentry from '@sentry/react-native'
 import { useFonts, PlayfairDisplay_700Bold, PlayfairDisplay_800ExtraBold } from '@expo-google-fonts/playfair-display'
 import { DMSans_400Regular, DMSans_500Medium, DMSans_600SemiBold, DMSans_700Bold } from '@expo-google-fonts/dm-sans'
 import { DMMono_500Medium } from '@expo-google-fonts/dm-mono'
@@ -21,6 +22,17 @@ import Habits from './src/screens/Habits'
 import Health from './src/screens/Health'
 import Progress from './src/screens/Progress'
 import Profile from './src/screens/Profile'
+
+// Crash + error monitoring. No-ops until you add EXPO_PUBLIC_SENTRY_DSN to .env,
+// and stays quiet during local development so you only capture real-world errors.
+const SENTRY_DSN = process.env.EXPO_PUBLIC_SENTRY_DSN
+if (SENTRY_DSN) {
+  Sentry.init({
+    dsn: SENTRY_DSN,
+    enabled: !__DEV__,
+    tracesSampleRate: 0.2,
+  })
+}
 
 const TABS = [
   { key: 'home', label: 'Home', icon: '⌂', screen: <Home /> },
@@ -121,7 +133,7 @@ function Root() {
   return <MainShell />
 }
 
-export default function App() {
+function App() {
   const [fontsLoaded] = useFonts({
     PlayfairDisplay_700Bold, PlayfairDisplay_800ExtraBold,
     DMSans_400Regular, DMSans_500Medium, DMSans_600SemiBold, DMSans_700Bold,
@@ -136,6 +148,10 @@ export default function App() {
     </ErrorBoundary>
   )
 }
+
+// Sentry.wrap enables native crash reporting + performance tracing on the root.
+// It's a harmless passthrough when Sentry isn't initialized (no DSN set).
+export default Sentry.wrap(App)
 
 const makeStyles = (C: Palette) => StyleSheet.create({
   shell: { flex: 1, backgroundColor: C.canvas, maxWidth: 480, width: '100%', alignSelf: 'center' },

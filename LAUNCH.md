@@ -121,6 +121,22 @@ Notes:
 
 ---
 
+## Optional — turn on crash monitoring (Sentry)
+
+The app is already wired for Sentry; it just needs a DSN to start reporting.
+
+1. Create a free account at https://sentry.io → **Create Project** → platform
+   **React Native**.
+2. Copy the project's **DSN** (looks like `https://abc123@o0.ingest.sentry.io/123`).
+3. Paste it into `.env`:  `EXPO_PUBLIC_SENTRY_DSN=...your dsn...`
+4. Rebuild (`eas build`). Crashes and caught errors now show up in your Sentry
+   dashboard. It stays silent in local dev and does nothing if the DSN is blank.
+
+_(For readable stack traces, later add `SENTRY_AUTH_TOKEN` + org/project so EAS
+uploads source maps — not required for basic crash capture.)_
+
+---
+
 ### Quick status reference
 
 | Area | State |

@@ -1,12 +1,13 @@
 import React from 'react'
 import { View, Text, Pressable, StyleSheet } from 'react-native'
+import * as Sentry from '@sentry/react-native'
 import { LIGHT, FONT } from './theme'
 
 type Props = { children: React.ReactNode }
 type State = { hasError: boolean }
 
 // Catches render-time crashes and shows a friendly fallback instead of a blank
-// screen. (Pairs well with a crash reporter like Sentry — see componentDidCatch.)
+// screen, and reports the error to Sentry (a no-op if Sentry isn't configured).
 export class ErrorBoundary extends React.Component<Props, State> {
   state: State = { hasError: false }
 
@@ -16,7 +17,7 @@ export class ErrorBoundary extends React.Component<Props, State> {
 
   componentDidCatch(error: Error, info: React.ErrorInfo) {
     console.error('Vitalis crashed:', error, info.componentStack)
-    // TODO: forward to a crash reporter (e.g. Sentry.captureException(error)).
+    Sentry.captureException(error, { extra: { componentStack: info.componentStack } })
   }
 
   render() {
