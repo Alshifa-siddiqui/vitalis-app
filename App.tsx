@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
-import { SafeAreaView, View, Text, Pressable, StyleSheet, StatusBar, ActivityIndicator, Modal } from 'react-native'
+import { View, Text, Pressable, StyleSheet, StatusBar, ActivityIndicator, Modal } from 'react-native'
+import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context'
 import * as Sentry from '@sentry/react-native'
 import { useFonts, PlayfairDisplay_700Bold, PlayfairDisplay_800ExtraBold } from '@expo-google-fonts/playfair-display'
 import { DMSans_400Regular, DMSans_500Medium, DMSans_600SemiBold, DMSans_700Bold } from '@expo-google-fonts/dm-sans'
@@ -147,11 +148,13 @@ function App() {
   })
   if (!fontsLoaded) return <Splash />
   return (
-    <ErrorBoundary>
-      <AuthProvider>
-        <Root />
-      </AuthProvider>
-    </ErrorBoundary>
+    <SafeAreaProvider>
+      <ErrorBoundary>
+        <AuthProvider>
+          <Root />
+        </AuthProvider>
+      </ErrorBoundary>
+    </SafeAreaProvider>
   )
 }
 

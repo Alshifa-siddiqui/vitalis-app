@@ -22,6 +22,20 @@ export async function ensureNotificationPermission(): Promise<boolean> {
   return requested.granted
 }
 
+const ANDROID_CHANNEL = 'reminders'
+
+// Android 8+ (API 26+) requires a notification channel, otherwise scheduled
+// notifications are silently dropped. Idempotent — safe to call every time.
+async function ensureAndroidChannel(): Promise<void> {
+  if (Platform.OS !== 'android') return
+  await Notifications.setNotificationChannelAsync(ANDROID_CHANNEL, {
+    name: 'Habit reminders',
+    importance: Notifications.AndroidImportance.DEFAULT,
+    sound: 'default',
+    lightColor: '#2D6A4F',
+  })
+}
+
 // Cancel all scheduled reminders and re-schedule one daily notification per
 // habit that has a reminderTime. Called whenever habits change.
 export async function syncReminders(habits: Habit[]): Promise<void> {
@@ -32,6 +46,7 @@ export async function syncReminders(habits: Habit[]): Promise<void> {
     return
   }
   if (!(await ensureNotificationPermission())) return
+  await ensureAndroidChannel()
 
   await Notifications.cancelAllScheduledNotificationsAsync()
   for (const h of habits) {
@@ -47,6 +62,7 @@ export async function syncReminders(habits: Habit[]): Promise<void> {
         type: Notifications.SchedulableTriggerInputTypes.DAILY,
         hour: hh,
         minute: mm,
+        channelId: ANDROID_CHANNEL,
       },
     })
   }

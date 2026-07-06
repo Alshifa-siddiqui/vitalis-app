@@ -41,7 +41,13 @@
       ],
       "expo-secure-store",
       "expo-web-browser",
-      "@sentry/react-native"
+      "@sentry/react-native",
+      [
+        "expo-notifications",
+        {
+          "color": "#2D6A4F"
+        }
+      ]
     ],
     "extra": {
       "eas": {
