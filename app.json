@@ -14,7 +14,7 @@
     },
     "android": {
       "package": "com.shifa.vitalis",
-      "versionCode": 1,
+      "versionCode": 5,
       "adaptiveIcon": {
         "backgroundColor": "#1B4332",
         "foregroundImage": "./assets/android-icon-foreground.png",

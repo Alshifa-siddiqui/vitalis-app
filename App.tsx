@@ -13,6 +13,7 @@ import { syncReminders } from './src/reminders'
 import { Lotus } from './src/Lotus'
 import { ErrorBoundary } from './src/ErrorBoundary'
 import { NavProvider } from './src/nav'
+import { useOnline } from './src/net'
 import HabitDetail from './src/screens/HabitDetail'
 import Paywall from './src/screens/Paywall'
 import Auth from './src/screens/Auth'
@@ -58,6 +59,19 @@ function Bar() {
   return <StatusBar barStyle={dark ? 'light-content' : 'dark-content'} />
 }
 
+function OfflineBanner() {
+  const C = useColors()
+  const online = useOnline()
+  if (online) return null
+  return (
+    <View style={{ backgroundColor: C.warmgold, paddingVertical: 6, paddingHorizontal: 14 }}>
+      <Text style={{ color: C.forest, fontSize: 12, fontFamily: FONT.semibold, textAlign: 'center' }}>
+        You’re offline — changes save on your phone and sync when you reconnect.
+      </Text>
+    </View>
+  )
+}
+
 function MainShell() {
   const C = useColors()
   const s = makeStyles(C)
@@ -76,6 +90,7 @@ function MainShell() {
       {(nav) => (
         <SafeAreaView style={s.shell}>
           <Bar />
+          <OfflineBanner />
           <View style={{ flex: 1 }}>{active.screen}</View>
           <View style={s.nav}>
             {TABS.map((t) => {

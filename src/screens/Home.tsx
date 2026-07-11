@@ -6,6 +6,25 @@ import { useStore } from '../store'
 import { usePullRefresh } from '../sync'
 import { computeStats, isDoneToday } from '../streaks'
 
+// Your "wellness plant" grows as your best streak climbs — a gentle reason to
+// return each day. Stages are keyed off the best current streak across habits.
+const STAGES = [
+  { min: 0, emoji: '🌱', name: 'Seedling' },
+  { min: 3, emoji: '🌿', name: 'Sprout' },
+  { min: 7, emoji: '🌾', name: 'Growing' },
+  { min: 14, emoji: '🌸', name: 'Budding' },
+  { min: 30, emoji: '🪷', name: 'In bloom' },
+  { min: 60, emoji: '🌳', name: 'Flourishing' },
+]
+function growthStage(streak: number) {
+  let i = 0
+  for (let j = 0; j < STAGES.length; j++) if (streak >= STAGES[j].min) i = j
+  const cur = STAGES[i]
+  const next = STAGES[i + 1]
+  const pct = next ? Math.min(1, (streak - cur.min) / (next.min - cur.min)) : 1
+  return { cur, next, pct, toNext: next ? next.min - streak : 0 }
+}
+
 export default function Home() {
   const C = useColors()
   const s = makeStyles(C)
@@ -18,6 +37,7 @@ export default function Home() {
   const total = habits.length
   const pct = total ? Math.round((done / total) * 100) : 0
   const best = habits.reduce((m, h) => Math.max(m, computeStats(h.history, h.frequency).currentStreak), 0)
+  const stage = growthStage(best)
 
   return (
     <ScrollView contentContainerStyle={{ padding: 20, paddingBottom: 28 }} showsVerticalScrollIndicator={false}
@@ -39,6 +59,19 @@ export default function Home() {
           </View>
           <View style={s.pill}><Text style={s.pillText}>🔥  Best streak: {best}</Text></View>
           <View style={s.pill}><Text style={s.pillText}>📋  Active habits: {total}</Text></View>
+        </View>
+      </View>
+
+      <View style={s.growth}>
+        <Text style={{ fontSize: 40 }}>{stage.cur.emoji}</Text>
+        <View style={{ flex: 1 }}>
+          <Text style={s.growthName}>{stage.cur.name}</Text>
+          <Text style={{ color: C.muted, fontSize: 12, marginTop: 2 }}>
+            {stage.next
+              ? `${stage.toNext} day${stage.toNext === 1 ? '' : 's'} to ${stage.next.name} ${stage.next.emoji}`
+              : 'Fully grown — incredible consistency! 🌿'}
+          </Text>
+          <View style={s.growthTrack}><View style={[s.growthFill, { width: `${Math.round(stage.pct * 100)}%` }]} /></View>
         </View>
       </View>
 
@@ -74,6 +107,10 @@ const makeStyles = (C: Palette) => StyleSheet.create({
   hero: { flexDirection: 'row', alignItems: 'center', gap: 18, backgroundColor: C.hero, borderRadius: 26, padding: 20, ...cardShadow, shadowOpacity: 0.2, shadowRadius: 16 },
   pill: { backgroundColor: 'rgba(255,255,255,0.15)', borderRadius: 14, paddingHorizontal: 12, paddingVertical: 9 },
   pillText: { color: C.white, fontSize: 13, fontFamily: FONT.semibold },
+  growth: { flexDirection: 'row', alignItems: 'center', gap: 14, backgroundColor: C.card, borderRadius: 20, padding: 16, marginTop: 16, ...cardShadow },
+  growthName: { fontFamily: FONT.display, fontSize: 18, color: C.forest },
+  growthTrack: { height: 8, borderRadius: 4, backgroundColor: C.lightmint, marginTop: 8, overflow: 'hidden' },
+  growthFill: { height: 8, borderRadius: 4, backgroundColor: C.secondary },
   tip: { flexDirection: 'row', gap: 12, backgroundColor: C.lightmint, borderColor: 'rgba(82,183,136,0.3)', borderWidth: 1, borderRadius: 18, padding: 16, marginTop: 18, marginBottom: 22 },
   tipLabel: { fontSize: 11, fontFamily: FONT.bold, letterSpacing: 0.5, color: C.mid },
 })
