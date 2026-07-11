@@ -55,6 +55,10 @@ export type HealthProfile = {
 export type Insight = { text: string; at: string } // at = ISO timestamp
 const MAX_INSIGHTS = 10
 
+export type Workout = { id: string; date: string; type: string; minutes: number }
+export const WORKOUT_TYPES = ['Strength', 'Cardio', 'Yoga', 'Walk', 'Sports', 'Other']
+const MAX_WORKOUTS = 60
+
 // Tracks AI insights used in the current month, for the free-tier allowance.
 export type AiUsage = { month: string; count: number }
 const monthKey = () => new Date().toISOString().slice(0, 7) // "YYYY-MM"
@@ -71,9 +75,14 @@ type State = {
   notificationsEnabled: boolean
   onboarded: boolean
   goals: string[]
+  focus: string // Home dashboard focus category ('' = All)
+  setFocus: (f: string) => void
   insights: Insight[]
   addInsight: (text: string) => void
   clearInsights: () => void
+  workouts: Workout[]
+  addWorkout: (type: string, minutes: number) => void
+  deleteWorkout: (id: string) => void
   plus: boolean
   setPlus: (v: boolean) => void
   aiUsage: AiUsage
@@ -106,10 +115,16 @@ export const useStore = create<State>()(
       notificationsEnabled: true,
       onboarded: false,
       goals: [],
+      focus: '',
+      setFocus: (f) => set({ focus: f }),
       insights: [],
       addInsight: (text) =>
         set((s) => ({ insights: [{ text, at: new Date().toISOString() }, ...s.insights].slice(0, MAX_INSIGHTS) })),
       clearInsights: () => set({ insights: [] }),
+      workouts: [],
+      addWorkout: (type, minutes) =>
+        set((s) => ({ workouts: [{ id: uid(), date: todayISO(), type, minutes }, ...s.workouts].slice(0, MAX_WORKOUTS) })),
+      deleteWorkout: (id) => set((s) => ({ workouts: s.workouts.filter((w) => w.id !== id) })),
       plus: false,
       setPlus: (v) => set({ plus: v }),
       aiUsage: { month: monthKey(), count: 0 },

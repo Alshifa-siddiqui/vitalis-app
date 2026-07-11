@@ -47,14 +47,18 @@ export async function getAIInsight(
   const dailyCount = habits.filter((h) => h.frequency === 'daily').length
   const done7 = payload.reduce((a, p) => a + p.last7, 0)
   const rate7 = dailyCount ? Math.round((100 * done7) / (dailyCount * 7)) : null
-  const goals = useStore.getState().goals
 
-  const sig = `${todayISO()}|${opts.fast ? 'f' : 'q'}|${payload.map((p) => `${p.name}:${p.currentStreak}:${p.doneToday}`).join(',')}`
+  const state = useStore.getState()
+  const goals = state.goals
+  const recentWorkouts = state.workouts.filter((w) => week.has(w.date))
+  const workouts7 = { sessions: recentWorkouts.length, minutes: recentWorkouts.reduce((a, w) => a + w.minutes, 0) }
+
+  const sig = `${todayISO()}|${opts.fast ? 'f' : 'q'}|${workouts7.sessions}|${payload.map((p) => `${p.name}:${p.currentStreak}:${p.doneToday}`).join(',')}`
   if (cache && cache.sig === sig) return { insight: cache.text, cached: true }
 
   log.event('ai_insight_requested', { habitCount: habits.length, fast: !!opts.fast, rate7: rate7 ?? -1 })
   const { data, error } = await supabase.functions.invoke('ai-insight', {
-    body: { habits: payload, goals, fast: !!opts.fast, rate7 },
+    body: { habits: payload, goals, fast: !!opts.fast, rate7, workouts7 },
   })
   if (error) { log.error(error, { where: 'ai-insight' }); return { error: error.message } }
   if (data?.error) return { error: data.error }

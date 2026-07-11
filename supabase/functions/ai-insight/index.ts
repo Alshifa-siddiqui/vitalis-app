@@ -83,12 +83,16 @@ Deno.serve(async (req) => {
   let goals: string[] = []
   let fast = false
   let rate7: number | null = null
+  let workouts7: { sessions: number; minutes: number } | null = null
   try {
     const body = await req.json()
     habits = Array.isArray(body?.habits) ? body.habits.slice(0, MAX_HABITS) : []
     goals = Array.isArray(body?.goals) ? body.goals.slice(0, 20) : []
     fast = !!body?.fast
     rate7 = typeof body?.rate7 === "number" ? body.rate7 : null
+    workouts7 = body?.workouts7 && typeof body.workouts7.sessions === "number"
+      ? { sessions: body.workouts7.sessions, minutes: body.workouts7.minutes }
+      : null
   } catch {
     return json({ error: "Invalid request body." }, 400)
   }
@@ -110,6 +114,9 @@ Deno.serve(async (req) => {
     ? `\nTheir focus goals: ${goals.join(", ")}.`
     : ""
   const rateLine = rate7 === null ? "" : `\nOverall 7-day completion: ${rate7}%.`
+  const workoutLine = workouts7 && workouts7.sessions > 0
+    ? `\nWorkouts this week: ${workouts7.sessions} session(s), ${workouts7.minutes} min total.`
+    : ""
 
   try {
     const anthropic = new Anthropic({ apiKey })
@@ -125,7 +132,7 @@ Deno.serve(async (req) => {
         "4. End with ONE concrete micro-action for tomorrow — a single small step, not a list.\n" +
         "This is general wellness encouragement, NOT medical advice — never diagnose or prescribe.",
       messages: [
-        { role: "user", content: `My habits this week:\n${summary}${rateLine}${goalLine}\n\nGive me my personalized insight.` },
+        { role: "user", content: `My habits this week:\n${summary}${rateLine}${workoutLine}${goalLine}\n\nGive me my personalized insight.` },
       ],
     })
     const insight = msg.content

@@ -1,7 +1,7 @@
-import { ScrollView, View, Text, StyleSheet, RefreshControl } from 'react-native'
+import { ScrollView, View, Text, Pressable, StyleSheet, RefreshControl } from 'react-native'
 import { cardShadow, FONT, type Palette } from '../theme'
 import { useColors } from '../useColors'
-import { Ring, HabitRow, EmptyState } from '../ui'
+import { Ring, HabitRow, EmptyState, Chip } from '../ui'
 import { useStore } from '../store'
 import { usePullRefresh } from '../sync'
 import { computeStats, isDoneToday, isDueToday } from '../streaks'
@@ -32,13 +32,32 @@ export default function Home() {
   const habits = useStore((s) => s.habits).filter((h) => !h.archived)
   const toggle = useStore((s) => s.toggleToday)
   const name = useStore((s) => s.profileName) || 'Friend'
+  const focus = useStore((s) => s.focus)
+  const setFocus = useStore((s) => s.setFocus)
 
-  const todays = habits.filter((h) => isDueToday(h.days))
-  const done = todays.filter((h) => isDoneToday(h.history)).length
-  const total = todays.length
+  const dueToday = habits.filter((h) => isDueToday(h.days))
+  const done = dueToday.filter((h) => isDoneToday(h.history)).length
+  const total = dueToday.length
   const pct = total ? Math.round((done / total) * 100) : 0
   const best = habits.reduce((m, h) => Math.max(m, computeStats(h.history, h.frequency, h.days).currentStreak), 0)
   const stage = growthStage(best)
+
+  // Focus mode: chips from the categories the user actually has; the active one
+  // floats its habits to the top of Today (an adaptive, low-maintenance dashboard).
+  const cats = Array.from(new Set(habits.map((h) => h.category)))
+  const activeFocus = focus && cats.includes(focus) ? focus : ''
+  const todays = [...dueToday].sort((a, b) => {
+    const av = a.category === activeFocus ? 0 : 1
+    const bv = b.category === activeFocus ? 0 : 1
+    return av - bv
+  })
+
+  // Predictive "streak at risk": habits with a streak worth protecting, due today,
+  // not yet done — surfaced from the afternoon on so mornings aren't nagged.
+  const afternoon = new Date().getHours() >= 12
+  const atRisk = afternoon
+    ? dueToday.filter((h) => !isDoneToday(h.history) && computeStats(h.history, h.frequency, h.days).currentStreak >= 3)
+    : []
 
   return (
     <ScrollView contentContainerStyle={{ padding: 20, paddingBottom: 28 }} showsVerticalScrollIndicator={false}
@@ -76,6 +95,25 @@ export default function Home() {
         </View>
       </View>
 
+      {atRisk.length > 0 && (
+        <View style={s.risk}>
+          <Text style={{ fontSize: 20 }}>🔥</Text>
+          <View style={{ flex: 1 }}>
+            <Text style={s.riskLabel}>STREAK AT RISK</Text>
+            <Text style={{ color: C.ink, fontSize: 14, marginTop: 2 }}>
+              {atRisk.length === 1
+                ? `Your ${computeStats(atRisk[0].history, atRisk[0].frequency, atRisk[0].days).currentStreak}-day “${atRisk[0].name}” streak needs today’s check-in.`
+                : `${atRisk.length} streaks need a check-in before the day ends.`}
+            </Text>
+          </View>
+          {atRisk.length === 1 && (
+            <Pressable onPress={() => toggle(atRisk[0].id)} style={s.riskBtn} accessibilityRole="button" accessibilityLabel="Check in now">
+              <Text style={{ color: C.white, fontSize: 13, fontFamily: FONT.bold }}>Check in</Text>
+            </Pressable>
+          )}
+        </View>
+      )}
+
       <View style={s.tip}>
         <Text style={{ fontSize: 20 }}>🤖</Text>
         <View style={{ flex: 1 }}>
@@ -87,6 +125,13 @@ export default function Home() {
           </Text>
         </View>
       </View>
+
+      {cats.length > 1 && (
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 12 }}>
+          <Chip label="All" active={activeFocus === ''} onPress={() => setFocus('')} />
+          {cats.map((c) => <Chip key={c} label={c} active={activeFocus === c} onPress={() => setFocus(c)} />)}
+        </ScrollView>
+      )}
 
       <View style={[s.rowBetween, { marginBottom: 12, alignItems: 'flex-end' }]}>
         <Text style={s.h2}>Today</Text>
@@ -115,4 +160,7 @@ const makeStyles = (C: Palette) => StyleSheet.create({
   growthFill: { height: 8, borderRadius: 4, backgroundColor: C.secondary },
   tip: { flexDirection: 'row', gap: 12, backgroundColor: C.lightmint, borderColor: 'rgba(82,183,136,0.3)', borderWidth: 1, borderRadius: 18, padding: 16, marginTop: 18, marginBottom: 22 },
   tipLabel: { fontSize: 11, fontFamily: FONT.bold, letterSpacing: 0.5, color: C.mid },
+  risk: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: 'rgba(244,162,97,0.14)', borderColor: 'rgba(244,162,97,0.4)', borderWidth: 1, borderRadius: 18, padding: 16, marginTop: 16 },
+  riskLabel: { fontSize: 11, fontFamily: FONT.bold, letterSpacing: 0.5, color: C.warmgold },
+  riskBtn: { backgroundColor: C.warmgold, borderRadius: 12, paddingHorizontal: 12, paddingVertical: 8 },
 })

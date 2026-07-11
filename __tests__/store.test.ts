@@ -66,6 +66,20 @@ describe('seedDemo', () => {
   })
 })
 
+describe('workouts', () => {
+  it('logs a workout dated today and can delete it', () => {
+    useStore.setState({ workouts: [] })
+    get().addWorkout('Strength', 45)
+    const w = get().workouts
+    expect(w.length).toBe(1)
+    expect(w[0].type).toBe('Strength')
+    expect(w[0].minutes).toBe(45)
+    expect(w[0].date).toBe(todayISO())
+    get().deleteWorkout(w[0].id)
+    expect(get().workouts).toEqual([])
+  })
+})
+
 describe('insights', () => {
   it('prepends new insights and caps the history at 10', () => {
     for (let i = 0; i < 12; i++) get().addInsight(`insight ${i}`)
