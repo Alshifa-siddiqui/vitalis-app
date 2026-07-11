@@ -13,6 +13,7 @@ export type Habit = {
   history: string[] // ISO dates of check-ins
   reminderTime?: string // "HH:MM" local time, or undefined for no reminder
   archived?: boolean
+  days?: number[] // weekdays (0=Sun..6=Sat) this habit is due; empty/undefined = every day
 }
 
 function isoDaysAgo(n: number): string {
@@ -34,7 +35,7 @@ const SEED: Habit[] = [
   { id: 's5', name: 'Sleep by 11pm', icon: '😴', frequency: 'daily', category: 'Health', createdAt: isoDaysAgo(30), history: run(4, 1) },
 ]
 
-export type NewHabit = { name: string; icon: string; frequency: Frequency; category: string; reminderTime?: string }
+export type NewHabit = { name: string; icon: string; frequency: Frequency; category: string; reminderTime?: string; days?: number[] }
 
 // Starter habit suggested for each onboarding goal.
 const STARTER: Record<string, NewHabit> = {

@@ -4,7 +4,7 @@ import { useColors } from '../useColors'
 import { Ring, HabitRow, EmptyState } from '../ui'
 import { useStore } from '../store'
 import { usePullRefresh } from '../sync'
-import { computeStats, isDoneToday } from '../streaks'
+import { computeStats, isDoneToday, isDueToday } from '../streaks'
 
 // Your "wellness plant" grows as your best streak climbs — a gentle reason to
 // return each day. Stages are keyed off the best current streak across habits.
@@ -33,10 +33,11 @@ export default function Home() {
   const toggle = useStore((s) => s.toggleToday)
   const name = useStore((s) => s.profileName) || 'Friend'
 
-  const done = habits.filter((h) => isDoneToday(h.history)).length
-  const total = habits.length
+  const todays = habits.filter((h) => isDueToday(h.days))
+  const done = todays.filter((h) => isDoneToday(h.history)).length
+  const total = todays.length
   const pct = total ? Math.round((done / total) * 100) : 0
-  const best = habits.reduce((m, h) => Math.max(m, computeStats(h.history, h.frequency).currentStreak), 0)
+  const best = habits.reduce((m, h) => Math.max(m, computeStats(h.history, h.frequency, h.days).currentStreak), 0)
   const stage = growthStage(best)
 
   return (
@@ -92,8 +93,9 @@ export default function Home() {
         <Text style={{ color: C.muted, fontSize: 14 }}>{done} of {total} done</Text>
       </View>
       <View style={{ gap: 10 }}>
-        {habits.map((h) => <HabitRow key={h.id} habit={h} onToggle={toggle} />)}
-        {total === 0 && <EmptyState emoji="🌱" title="No habits yet" subtitle="Head to the Habits tab to plant your first one." />}
+        {todays.map((h) => <HabitRow key={h.id} habit={h} onToggle={toggle} />)}
+        {total === 0 && habits.length === 0 && <EmptyState emoji="🌱" title="No habits yet" subtitle="Head to the Habits tab to plant your first one." />}
+        {total === 0 && habits.length > 0 && <EmptyState emoji="🌿" title="Nothing scheduled today" subtitle="Enjoy the rest — your other habits will be back on their days." />}
       </View>
     </ScrollView>
   )

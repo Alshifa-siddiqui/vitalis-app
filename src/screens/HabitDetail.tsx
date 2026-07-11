@@ -7,6 +7,8 @@ import { useStore } from '../store'
 import { tapFeedback, successFeedback } from '../haptics'
 import { computeStats, isDoneToday, habitStrength } from '../streaks'
 
+const DAY_ABBR = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+
 function Stat({ value, label, C }: { value: string | number; label: string; C: Palette }) {
   return (
     <View style={{ flex: 1, backgroundColor: C.card, borderRadius: 16, padding: 14, alignItems: 'center', ...cardShadow }}>
@@ -26,8 +28,8 @@ export default function HabitDetail({ id, onClose }: { id: string; onClose: () =
 
   if (!habit) return <View style={s.wrap} />
 
-  const stats = computeStats(habit.history, habit.frequency)
-  const strength = habitStrength(habit.history, habit.frequency)
+  const stats = computeStats(habit.history, habit.frequency, habit.days)
+  const strength = habitStrength(habit.history, habit.frequency, habit.days)
   const done = isDoneToday(habit.history)
   const checkIn = () => {
     if (done) tapFeedback()
@@ -50,7 +52,10 @@ export default function HabitDetail({ id, onClose }: { id: string; onClose: () =
         <View style={{ alignItems: 'center', marginBottom: 18 }}>
           <View style={s.icon}><Text style={{ fontSize: 40 }}>{habit.icon}</Text></View>
           <Text style={s.name}>{habit.name}</Text>
-          <Text style={s.meta}>{habit.category} · {habit.frequency}{habit.reminderTime ? ` · ⏰ ${habit.reminderTime}` : ''}</Text>
+          <Text style={s.meta}>
+            {habit.category} · {habit.days && habit.days.length ? habit.days.map((d) => DAY_ABBR[d]).join(', ') : habit.frequency}
+            {habit.reminderTime ? ` · ⏰ ${habit.reminderTime}` : ''}
+          </Text>
         </View>
 
         <View style={{ flexDirection: 'row', gap: 10 }}>

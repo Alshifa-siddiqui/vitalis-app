@@ -53,17 +53,32 @@ export async function syncReminders(habits: Habit[]): Promise<void> {
     if (!h.reminderTime) continue
     const [hh, mm] = h.reminderTime.split(':').map(Number)
     if (Number.isNaN(hh) || Number.isNaN(mm)) continue
-    await Notifications.scheduleNotificationAsync({
-      content: {
-        title: '⏰ Vitalis',
-        body: `Time for "${h.name}" — keep your streak alive!`,
-      },
-      trigger: {
-        type: Notifications.SchedulableTriggerInputTypes.DAILY,
-        hour: hh,
-        minute: mm,
-        channelId: ANDROID_CHANNEL,
-      },
-    })
+    const content = { title: '⏰ Vitalis', body: `Time for "${h.name}" — keep your streak alive!` }
+    const scheduledDays = h.days && h.days.length > 0 && h.days.length < 7 ? h.days : null
+    if (scheduledDays) {
+      // Weekly reminder on each scheduled weekday (expo weekday: 1=Sun..7=Sat).
+      for (const d of scheduledDays) {
+        await Notifications.scheduleNotificationAsync({
+          content,
+          trigger: {
+            type: Notifications.SchedulableTriggerInputTypes.WEEKLY,
+            weekday: d + 1,
+            hour: hh,
+            minute: mm,
+            channelId: ANDROID_CHANNEL,
+          },
+        })
+      }
+    } else {
+      await Notifications.scheduleNotificationAsync({
+        content,
+        trigger: {
+          type: Notifications.SchedulableTriggerInputTypes.DAILY,
+          hour: hh,
+          minute: mm,
+          channelId: ANDROID_CHANNEL,
+        },
+      })
+    }
   }
 }

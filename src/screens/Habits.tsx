@@ -10,6 +10,7 @@ import type { Frequency } from '../streaks'
 
 const FREQS: Frequency[] = ['daily', 'weekly', 'monthly']
 const REMIND = ['Off', '07:00', '08:00', '12:00', '18:00', '21:00']
+const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'] // index = getDay()
 
 export default function Habits() {
   const C = useColors()
@@ -31,7 +32,9 @@ export default function Habits() {
   const [freq, setFreq] = useState<Frequency>('daily')
   const [cat, setCat] = useState(CATEGORIES[0])
   const [remind, setRemind] = useState('Off')
+  const [days, setDays] = useState<number[]>([])
   const [search, setSearch] = useState('')
+  const toggleDay = (i: number) => setDays((p) => (p.includes(i) ? p.filter((x) => x !== i) : [...p, i]))
 
   const cats = ['All', ...CATEGORIES, 'Archived']
   const base = habits.filter((h) =>
@@ -43,16 +46,18 @@ export default function Habits() {
   const activeCount = habits.filter((h) => !h.archived).length
   const openAdd = () => {
     if (!canAddHabit(plus, activeCount)) { openPaywall(); return }
-    setEditing(null); setName(''); setIcon(ICON_CHOICES[0]); setFreq('daily'); setCat(CATEGORIES[0]); setRemind('Off'); setOpen(true)
+    setEditing(null); setName(''); setIcon(ICON_CHOICES[0]); setFreq('daily'); setCat(CATEGORIES[0]); setRemind('Off'); setDays([]); setOpen(true)
   }
   const openEdit = (h: Habit) => {
-    setEditing(h); setName(h.name); setIcon(h.icon); setFreq(h.frequency); setCat(h.category); setRemind(h.reminderTime || 'Off'); setOpen(true)
+    setEditing(h); setName(h.name); setIcon(h.icon); setFreq(h.frequency); setCat(h.category); setRemind(h.reminderTime || 'Off'); setDays(h.days || []); setOpen(true)
   }
   const save = () => {
     if (!name.trim()) return
     const reminderTime = remind === 'Off' ? undefined : remind
-    if (editing) updateHabit(editing.id, { name: name.trim(), icon, frequency: freq, category: cat, reminderTime })
-    else addHabit({ name: name.trim(), icon, frequency: freq, category: cat, reminderTime })
+    // 0 or all 7 days selected = "every day" → store undefined
+    const daysVal = days.length > 0 && days.length < 7 ? [...days].sort((a, b) => a - b) : undefined
+    if (editing) updateHabit(editing.id, { name: name.trim(), icon, frequency: freq, category: cat, reminderTime, days: daysVal })
+    else addHabit({ name: name.trim(), icon, frequency: freq, category: cat, reminderTime, days: daysVal })
     setOpen(false)
   }
   const remove = () => { if (editing) { deleteHabit(editing.id); setOpen(false) } }
@@ -110,6 +115,17 @@ export default function Habits() {
                 {FREQS.map((f) => <Chip key={f} label={f} active={freq === f} onPress={() => setFreq(f)} />)}
               </View>
 
+              <Text style={s.label}>On days {days.length === 0 || days.length === 7 ? '(every day)' : ''}</Text>
+              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
+                {WEEKDAYS.map((d, i) => (
+                  <Pressable key={i} onPress={() => toggleDay(i)}
+                    accessibilityRole="button" accessibilityLabel={d} accessibilityState={{ selected: days.includes(i) }}
+                    style={[s.day, days.includes(i) && { backgroundColor: C.primary, borderColor: C.primary }]}>
+                    <Text style={{ fontSize: 12, fontFamily: FONT.bold, color: days.includes(i) ? C.white : C.muted }}>{d[0]}</Text>
+                  </Pressable>
+                ))}
+              </View>
+
               <Text style={s.label}>Category</Text>
               <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
                 {CATEGORIES.map((cc) => <Chip key={cc} label={cc} active={cat === cc} onPress={() => setCat(cc)} />)}
@@ -145,4 +161,5 @@ const makeStyles = (C: Palette) => StyleSheet.create({
   input: { backgroundColor: C.card, borderRadius: 14, paddingHorizontal: 14, paddingVertical: 12, fontSize: 16, fontFamily: FONT.sans, color: C.ink, borderWidth: 1, borderColor: C.muted + '33' },
   iconWrap: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   iconBtn: { width: 46, height: 46, borderRadius: 14, backgroundColor: C.card, alignItems: 'center', justifyContent: 'center', borderWidth: 1.5, borderColor: C.muted + '33' },
+  day: { width: 38, height: 38, borderRadius: 12, backgroundColor: C.card, alignItems: 'center', justifyContent: 'center', borderWidth: 1.5, borderColor: C.muted + '33' },
 })

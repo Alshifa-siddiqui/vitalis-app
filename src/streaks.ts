@@ -54,10 +54,57 @@ function streakRuns(dates: Date[], gap: number): { longest: number; current: num
   return { longest, current }
 }
 
-export function computeStats(history: string[], frequency: Frequency): Stats {
+function isoOf(d: Date): string {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+}
+
+// Whether a habit scheduled for `days` (0=Sun..6=Sat) is due today. No days
+// (undefined/empty) means "every day".
+export function isDueToday(days?: number[]): boolean {
+  if (!days || days.length === 0) return true
+  return days.includes(new Date().getDay())
+}
+
+// Streaks for a habit scheduled on specific weekdays: only "due" days count, and
+// non-due days never break the streak. Today isn't required until it's actually
+// completed (grace), so an alive streak doesn't drop just because it's morning.
+function weekdayStats(history: string[], days: number[]): { current: number; longest: number } {
+  const done = new Set(history)
+  const isDue = (d: Date) => days.includes(d.getDay())
+
+  let current = 0
+  const cur = toDate(todayISO())
+  if (isDue(cur) && !done.has(isoOf(cur))) cur.setDate(cur.getDate() - 1)
+  for (let guard = 0; guard < 4000; guard++) {
+    if (isDue(cur)) {
+      if (done.has(isoOf(cur))) current += 1
+      else break
+    }
+    cur.setDate(cur.getDate() - 1)
+  }
+
+  let longest = 0
+  const sorted = Array.from(done).sort()
+  if (sorted.length) {
+    const end = toDate(todayISO())
+    const d = toDate(sorted[0])
+    let run = 0
+    for (let guard = 0; d <= end && guard < 40000; guard++) {
+      if (isDue(d)) {
+        if (done.has(isoOf(d))) { run += 1; if (run > longest) longest = run } else run = 0
+      }
+      d.setDate(d.getDate() + 1)
+    }
+  }
+  return { current, longest }
+}
+
+export function computeStats(history: string[], frequency: Frequency, days?: number[]): Stats {
   const unique = Array.from(new Set(history)).sort()
-  const dates = unique.map(toDate)
-  const { longest, current } = streakRuns(dates, GAP[frequency] ?? 1)
+  const { longest, current } =
+    days && days.length
+      ? weekdayStats(history, days)
+      : streakRuns(unique.map(toDate), GAP[frequency] ?? 1)
   return {
     completedCount: unique.length,
     currentStreak: current,
@@ -79,10 +126,12 @@ function isoDaysAgo(n: number): string {
 // Forgiving "habit strength" (0–100), inspired by Loop's model: a decayed
 // completion rate over the last 30 days where recent days count more. Unlike a
 // streak, a single miss barely dents it, and it recovers as you check in again.
-export function habitStrength(history: string[], frequency: Frequency): number {
+export function habitStrength(history: string[], frequency: Frequency, days?: number[]): number {
   const WINDOW = 30
   const DECAY = 0.94
-  const perDay = frequency === 'weekly' ? 1 / 7 : frequency === 'monthly' ? 1 / 30 : 1
+  const perDay = days && days.length
+    ? days.length / 7
+    : frequency === 'weekly' ? 1 / 7 : frequency === 'monthly' ? 1 / 30 : 1
   const done = new Set(history)
   let got = 0
   let expected = 0

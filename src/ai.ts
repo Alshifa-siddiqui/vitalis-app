@@ -32,7 +32,7 @@ export async function getAIInsight(
 
   const week = last7Set()
   const payload = habits.map((h) => {
-    const st = computeStats(h.history, h.frequency)
+    const st = computeStats(h.history, h.frequency, h.days)
     return {
       name: h.name,
       category: h.category,

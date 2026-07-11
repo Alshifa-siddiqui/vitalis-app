@@ -1,4 +1,4 @@
-import { computeStats, isDoneToday, todayISO, GAP, BADGES, habitStrength } from '../src/streaks'
+import { computeStats, isDoneToday, todayISO, GAP, BADGES, habitStrength, isDueToday } from '../src/streaks'
 
 // ISO date `n` days before today (0 = today).
 const iso = (n: number) => {
@@ -30,6 +30,24 @@ describe('habitStrength', () => {
     const v = habitStrength(range(60), 'weekly')
     expect(v).toBeGreaterThanOrEqual(0)
     expect(v).toBeLessThanOrEqual(100)
+  })
+})
+
+describe('weekday scheduling', () => {
+  const wd = new Date().getDay()
+  it('isDueToday respects the schedule', () => {
+    expect(isDueToday(undefined)).toBe(true)
+    expect(isDueToday([])).toBe(true)
+    expect(isDueToday([wd])).toBe(true)
+    expect(isDueToday([(wd + 1) % 7])).toBe(false)
+  })
+  it('counts streaks only over due days', () => {
+    const hist = [iso(0), iso(7), iso(14)] // three consecutive weekly due days
+    expect(computeStats(hist, 'weekly', [wd]).currentStreak).toBe(3)
+  })
+  it('breaks when a due day was missed', () => {
+    const hist = [iso(0), iso(14)] // missed the due day 7 days ago
+    expect(computeStats(hist, 'weekly', [wd]).currentStreak).toBe(1)
   })
 })
 

@@ -80,7 +80,7 @@ export function HabitRow({ habit, onToggle, onLongPress }: { habit: Habit; onTog
   const C = useColors()
   const s = makeStyles(C)
   const { openDetail } = useNav()
-  const stats = computeStats(habit.history, habit.frequency)
+  const stats = computeStats(habit.history, habit.frequency, habit.days)
   const done = isDoneToday(habit.history)
   const check = () => {
     if (done) tapFeedback()
