@@ -5,7 +5,7 @@ import { Heatmap } from '../Heatmap'
 import { PrimaryButton } from '../ui'
 import { useStore } from '../store'
 import { tapFeedback, successFeedback } from '../haptics'
-import { computeStats, isDoneToday } from '../streaks'
+import { computeStats, isDoneToday, habitStrength } from '../streaks'
 
 function Stat({ value, label, C }: { value: string | number; label: string; C: Palette }) {
   return (
@@ -27,6 +27,7 @@ export default function HabitDetail({ id, onClose }: { id: string; onClose: () =
   if (!habit) return <View style={s.wrap} />
 
   const stats = computeStats(habit.history, habit.frequency)
+  const strength = habitStrength(habit.history, habit.frequency)
   const done = isDoneToday(habit.history)
   const checkIn = () => {
     if (done) tapFeedback()
@@ -59,6 +60,15 @@ export default function HabitDetail({ id, onClose }: { id: string; onClose: () =
         </View>
 
         <View style={s.card}>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 }}>
+            <Text style={s.cardLabel}>Habit strength</Text>
+            <Text style={{ fontFamily: FONT.mono, fontSize: 13, color: C.primary }}>{strength}%</Text>
+          </View>
+          <View style={s.strengthTrack}><View style={[s.strengthFill, { width: `${strength}%` }]} /></View>
+          <Text style={{ color: C.muted, fontSize: 11, marginTop: 8 }}>Recovers as you check in — one missed day won’t reset it.</Text>
+        </View>
+
+        <View style={s.card}>
           <Text style={s.cardLabel}>Last 13 weeks  ·  {weekDone}/7 this week</Text>
           <Heatmap history={habit.history} />
         </View>
@@ -83,4 +93,6 @@ const makeStyles = (C: Palette) => StyleSheet.create({
   meta: { fontFamily: FONT.medium, fontSize: 14, color: C.muted, marginTop: 4, textTransform: 'capitalize' },
   card: { backgroundColor: C.card, borderRadius: 18, padding: 16, marginTop: 18, ...cardShadow },
   cardLabel: { fontFamily: FONT.bold, fontSize: 12, color: C.muted, marginBottom: 12 },
+  strengthTrack: { height: 10, borderRadius: 5, backgroundColor: C.lightmint, overflow: 'hidden' },
+  strengthFill: { height: 10, borderRadius: 5, backgroundColor: C.secondary },
 })

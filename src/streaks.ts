@@ -70,6 +70,31 @@ export function isDoneToday(history: string[]): boolean {
   return history.includes(todayISO())
 }
 
+function isoDaysAgo(n: number): string {
+  const d = new Date()
+  d.setDate(d.getDate() - n)
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+}
+
+// Forgiving "habit strength" (0–100), inspired by Loop's model: a decayed
+// completion rate over the last 30 days where recent days count more. Unlike a
+// streak, a single miss barely dents it, and it recovers as you check in again.
+export function habitStrength(history: string[], frequency: Frequency): number {
+  const WINDOW = 30
+  const DECAY = 0.94
+  const perDay = frequency === 'weekly' ? 1 / 7 : frequency === 'monthly' ? 1 / 30 : 1
+  const done = new Set(history)
+  let got = 0
+  let expected = 0
+  for (let d = 0; d < WINDOW; d++) {
+    const w = Math.pow(DECAY, d)
+    expected += w * perDay
+    if (done.has(isoDaysAgo(d))) got += w
+  }
+  if (expected === 0) return 0
+  return Math.max(0, Math.min(100, Math.round((got / expected) * 100)))
+}
+
 // Badge rules (ported from VitalisDB._check_badges)
 export const BADGES: { icon: string; name: string; test: (s: Stats) => boolean }[] = [
   { icon: '🔥', name: 'First Flame', test: (s) => s.completedCount >= 1 },

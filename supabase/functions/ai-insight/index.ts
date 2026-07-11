@@ -22,6 +22,7 @@ function json(body: unknown, status = 200) {
 type HabitSummary = {
   name: string; frequency: string; category: string
   completedCount: number; currentStreak: number; longestStreak: number
+  last7?: number; doneToday?: boolean
 }
 
 const DAILY_LIMIT = 20       // insights per user per day
@@ -81,11 +82,13 @@ Deno.serve(async (req) => {
   let habits: HabitSummary[] = []
   let goals: string[] = []
   let fast = false
+  let rate7: number | null = null
   try {
     const body = await req.json()
     habits = Array.isArray(body?.habits) ? body.habits.slice(0, MAX_HABITS) : []
     goals = Array.isArray(body?.goals) ? body.goals.slice(0, 20) : []
     fast = !!body?.fast
+    rate7 = typeof body?.rate7 === "number" ? body.rate7 : null
   } catch {
     return json({ error: "Invalid request body." }, 400)
   }
@@ -98,25 +101,31 @@ Deno.serve(async (req) => {
   }
 
   const summary = habits
-    .map((h) => `- ${h.name} (${h.frequency}, ${h.category}): ${h.completedCount} total check-ins, current streak ${h.currentStreak}, best ${h.longestStreak}`)
+    .map((h) => {
+      const slipped = h.longestStreak >= 3 && h.currentStreak === 0 && h.completedCount > 0
+      return `- ${h.name} (${h.category}): current streak ${h.currentStreak}, best ${h.longestStreak}, ${h.last7 ?? 0}/7 this week${h.doneToday ? ", done today" : ""}${slipped ? " — streak recently broke" : ""}`
+    })
     .join("\n")
   const goalLine = goals.length
-    ? `\n\nThe user's stated focus goals are: ${goals.join(", ")}. Tailor your suggestion toward these where it fits.`
+    ? `\nTheir focus goals: ${goals.join(", ")}.`
     : ""
+  const rateLine = rate7 === null ? "" : `\nOverall 7-day completion: ${rate7}%.`
 
   try {
     const anthropic = new Anthropic({ apiKey })
     const msg = await anthropic.messages.create({
       model: fast ? MODEL_FAST : MODEL_QUALITY,
-      max_tokens: 600,
+      max_tokens: 400,
       system:
-        "You are a warm, encouraging wellness coach inside the Vitalis habit app. " +
-        "Given the user's habits and streaks, reply with 2-3 short, specific, supportive observations " +
-        "and ONE concrete suggestion for tomorrow. Be concise and motivating. " +
-        "This is general wellness encouragement, NOT medical advice — never diagnose or prescribe. " +
-        "Reply in plain text (no markdown headings), under 120 words.",
+        "You are a warm, personal wellness coach inside the Vitalis habit app. " +
+        "Write a short insight (under 100 words), plain text, no markdown headings. Follow these rules:\n" +
+        "1. Be SPECIFIC — name their strongest habit/streak as their anchor to protect, and gently name one that needs attention.\n" +
+        "2. If a habit's streak recently broke, do NOT scold — acknowledge it kindly and give ONE tiny step to restart.\n" +
+        "3. Match tone to their 7-day completion: high = celebratory and motivating; low = gentle and reassuring. Never guilt-trip.\n" +
+        "4. End with ONE concrete micro-action for tomorrow — a single small step, not a list.\n" +
+        "This is general wellness encouragement, NOT medical advice — never diagnose or prescribe.",
       messages: [
-        { role: "user", content: `Here are my habits:\n${summary}${goalLine}\n\nGive me a short personalized insight.` },
+        { role: "user", content: `My habits this week:\n${summary}${rateLine}${goalLine}\n\nGive me my personalized insight.` },
       ],
     })
     const insight = msg.content

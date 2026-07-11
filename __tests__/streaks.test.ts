@@ -1,4 +1,4 @@
-import { computeStats, isDoneToday, todayISO, GAP, BADGES } from '../src/streaks'
+import { computeStats, isDoneToday, todayISO, GAP, BADGES, habitStrength } from '../src/streaks'
 
 // ISO date `n` days before today (0 = today).
 const iso = (n: number) => {
@@ -11,6 +11,25 @@ describe('todayISO', () => {
   it('is YYYY-MM-DD and equals iso(0)', () => {
     expect(todayISO()).toMatch(/^\d{4}-\d{2}-\d{2}$/)
     expect(todayISO()).toBe(iso(0))
+  })
+})
+
+describe('habitStrength', () => {
+  const range = (n: number) => Array.from({ length: n }, (_, i) => iso(i))
+  it('is 0 with no history and ~100 when done every day', () => {
+    expect(habitStrength([], 'daily')).toBe(0)
+    expect(habitStrength(range(30), 'daily')).toBeGreaterThanOrEqual(99)
+  })
+  it('forgives a single recent miss (barely dents strength)', () => {
+    const perfect = habitStrength(range(30), 'daily')
+    const oneMiss = habitStrength(range(30).filter((d) => d !== iso(2)), 'daily')
+    expect(oneMiss).toBeGreaterThan(85) // still strong
+    expect(perfect - oneMiss).toBeLessThan(15) // a miss doesn't reset it
+  })
+  it('stays within 0–100', () => {
+    const v = habitStrength(range(60), 'weekly')
+    expect(v).toBeGreaterThanOrEqual(0)
+    expect(v).toBeLessThanOrEqual(100)
   })
 })
 

@@ -50,7 +50,7 @@ export default function Health() {
     const res = await getAIInsight(habits, { fast })
     setLoading(false)
     if (res.error) setAiError(res.error)
-    else if (res.insight) { addInsight(res.insight); recordAiUse() }
+    else if (res.insight) { addInsight(res.insight); if (!res.cached) recordAiUse() }
   }
 
   const latest = insights[0]
